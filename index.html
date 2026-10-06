@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'année de l'orientation 2026-2027</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F8FB;--card:#FFFFFF;--ink:#16203A;--slate:#586179;--muted:#8A92A6;--rule:#DCE0E8;--hover:#EEF1F6;
+  --t-aff:#5243C2;--t-sem:#0A7766;--t-sal:#B02E68;--t-ega:#3A7420;--t-met:#8F5B00;--t-eq:#245FA3;--t-oni:#B85300;--t-ent:#9E2A2B;
+  --now:#D6332A;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F131D;--card:#171C29;--ink:#E7EBF3;--slate:#A6AEC0;--muted:#77809A;--rule:#2A3143;--hover:#1F2535;
+  --t-aff:#A79CF5;--t-sem:#4CC6B0;--t-sal:#F07EAB;--t-ega:#8DC968;--t-met:#E5AE45;--t-eq:#7DB1EE;--t-oni:#F59A4F;--t-ent:#F08A84;--now:#FF6B5F;}}
+:root[data-theme="dark"]{
+  --paper:#0F131D;--card:#171C29;--ink:#E7EBF3;--slate:#A6AEC0;--muted:#77809A;--rule:#2A3143;--hover:#1F2535;
+  --t-aff:#A79CF5;--t-sem:#4CC6B0;--t-sal:#F07EAB;--t-ega:#8DC968;--t-met:#E5AE45;--t-eq:#7DB1EE;--t-oni:#F59A4F;--t-ent:#F08A84;--now:#FF6B5F;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 24px 80px}
+.logo{display:inline-block;background:#fff;padding:8px 12px;border-radius:8px;margin:0 0 22px}
+.logo img{display:block;height:76px;width:auto}
+@media (max-width:720px){.logo img{height:60px}}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,6vw,58px);line-height:1;letter-spacing:-0.02em;margin:0 0 10px}
+header p{margin:0;color:var(--slate);max-width:62ch}
+.vh{position:absolute;left:-9999px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Barre d'outils */
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:28px 0 18px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:10px;padding:3px;background:var(--card)}
+.seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:14px;color:var(--slate);padding:6px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.pnav{display:inline-flex;align-items:center;gap:4px}
+.pnav button{appearance:none;border:1px solid var(--rule);background:var(--card);color:var(--ink);width:34px;height:34px;border-radius:8px;font-size:18px;line-height:1;cursor:pointer}
+.pnav button:disabled{opacity:.35;cursor:default}
+.plabel{font-family:var(--display);font-weight:600;font-size:17px;min-width:12ch;text-align:center;padding:0 6px}
+.plabel small{display:block;font-family:var(--body);font-weight:400;font-size:12px;color:var(--muted)}
+.exports{margin-left:auto;display:flex;gap:8px}
+.export{appearance:none;font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--card);color:var(--ink);cursor:pointer}
+.export:hover{background:var(--hover)}
+.xmsg{font-size:13px;color:var(--slate);width:100%;text-align:right;min-height:0}
+
+/* Filtres */
+.filters{display:grid;gap:14px;padding:18px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:24px 0 28px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row .lab{font-size:13px;color:var(--slate);min-width:92px}
+.search{flex:1;min-width:220px;position:relative}
+.search input{width:100%;font:inherit;font-size:15px;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.chip{appearance:none;font:inherit;font-size:14px;padding:6px 12px 6px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--slate);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.chip .dot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--slate))}
+.chip[aria-pressed="true"]{border-color:var(--c,var(--ink));color:var(--ink);background:color-mix(in srgb,var(--c,var(--ink)) 12%,var(--card))}
+.chip[aria-pressed="false"] .dot{background:transparent;outline:1.5px solid var(--c,var(--slate));outline-offset:-1.5px}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--slate)}
+.linkbtn{appearance:none;border:0;background:none;font:inherit;font-size:14px;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0}
+
+/* Fil */
+.month{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;padding:22px 0;border-top:1px solid var(--rule)}
+.month:first-child{border-top:0}
+.month h2{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;margin:0;letter-spacing:-0.01em;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start}
+.month h2 small{display:block;font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted);letter-spacing:0;margin-top:6px}
+.month.isnow h2{color:var(--now)}
+.events{display:grid;gap:10px}
+.ev{background:var(--card);border-left:4px solid var(--c);padding:14px 16px;border-radius:0 8px 8px 0}
+.ev.done{background:transparent;outline:1px solid var(--rule);outline-offset:-1px}
+.ev.done h3,.ev.done .desc{color:var(--slate)}
+.ev .top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.ev h3{font-family:var(--display);font-weight:600;font-size:18px;line-height:1.25;margin:0}
+.ev .when{font-size:14px;color:var(--c);font-weight:700;white-space:nowrap}
+.ev .desc{margin:6px 0 10px;font-size:15px;max-width:68ch}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;padding:2px 8px;border-radius:4px;background:var(--hover);color:var(--slate)}
+.tag.theme{background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c)}
+.tag.tbc{background:transparent;outline:1px dashed var(--muted);outline-offset:-1px}
+.tag.done{background:transparent;outline:1px solid var(--rule);outline-offset:-1px}
+.empty{padding:40px 0;color:var(--slate);max-width:70ch}
+.empty b{color:var(--ink)}
+.srcinfo{font-size:13px;color:var(--muted);margin:-12px 0 20px;min-height:1em}
+.more{font-size:14px;color:var(--ink);text-underline-offset:3px;display:inline-block;margin:0 0 10px}
+
+/* Frise */
+.gscroll{overflow-x:auto;margin:0 -4px;padding:0 4px 8px}
+.gantt{position:relative}
+.ghead,.grow{display:grid;grid-template-columns:170px minmax(0,1fr)}
+.ghead .track{height:34px;border-bottom:1px solid var(--rule)}
+.gmonth{position:absolute;top:0;bottom:0;padding:6px 8px;font-family:var(--display);font-weight:600;font-size:14px;border-left:1px solid var(--rule);white-space:nowrap;overflow:hidden}
+.gmonth.isnow{color:var(--now)}
+.track{position:relative}
+.grow .track{height:34px}
+.grow.first{border-top:1px solid var(--rule)}
+.glab{font-size:13px;color:var(--slate);padding:8px 12px 0 0;line-height:1.25}
+.glab b{display:flex;gap:7px;align-items:flex-start;color:var(--ink);font-weight:700}
+.glab b::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:3px}
+.bar{position:absolute;top:5px;height:24px;border-radius:5px;background:color-mix(in srgb,var(--c) 22%,var(--card));border:0;border-left:3px solid var(--c);padding:0 8px;font:inherit;font-size:13px;color:var(--ink);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;min-width:8px}
+.bar.rec{background:transparent;border:1.5px dashed var(--c);border-left-width:3px;border-left-style:solid}
+.bar.done{background:var(--hover);border-left-color:var(--muted);color:var(--slate)}
+.bar[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
+.blab{position:absolute;top:9px;font-size:12px;color:var(--slate);white-space:nowrap;pointer-events:none}
+.overlay{position:absolute;top:0;bottom:0;left:170px;right:0;pointer-events:none}
+.vline{position:absolute;top:34px;bottom:0;border-left:1px solid var(--rule)}
+.vline.week{border-left:1px dotted var(--rule)}
+.vline.today{border-left:2px solid var(--now);top:0}
+.vline.today span{position:absolute;top:-2px;left:4px;font-size:11px;color:var(--now);background:var(--paper);padding:0 3px;white-space:nowrap}
+.gdet{margin-top:18px;min-height:20px}
+.ghint{font-size:13px;color:var(--muted);margin-top:8px}
+footer{margin-top:48px;font-size:13px;color:var(--muted);max-width:72ch}
+
+@media (max-width:720px){
+  .wrap{padding:28px 16px 60px}
+  .month{grid-template-columns:1fr;gap:12px}
+  .month h2{position:static;font-size:26px}
+  .row .lab{min-width:100%}
+  .exports{margin-left:0}
+  .xmsg{text-align:left}
+  .ghead,.grow{grid-template-columns:120px minmax(0,1fr)}
+  .overlay{left:120px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><img id="logo" alt="Région académique Île-de-France" src="data:image/png;base64,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"></div>
+    <h1>L'année de l'orientation<br>2026-2027</h1>
+    <p>Échéances d'affectation, semaines thématiques, salons et temps forts de la région académique Île-de-France. Choisissez une période, une thématique ou un public, puis exportez la sélection vers votre agenda.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="Affichage" id="vseg">
+      <button data-v="fil">Fil</button><button data-v="frise">Frise</button>
+    </div>
+    <div class="seg" role="group" aria-label="Période" id="gseg">
+      <button data-g="annee">Année</button><button data-g="sem">Semestre</button><button data-g="tri">Trimestre</button>
+    </div>
+    <div class="pnav" id="pnav">
+      <button id="prev" aria-label="Période précédente">‹</button>
+      <div class="plabel" id="plabel" aria-live="polite"></div>
+      <button id="next" aria-label="Période suivante">›</button>
+    </div>
+    <div class="exports" id="exports" hidden><button class="export" id="pdf">Exporter en PDF</button><button class="export" id="export">Agenda (.csv)</button></div>
+    <div class="xmsg" id="xmsg" aria-live="polite"></div>
+  </div>
+
+  <section class="filters" aria-label="Filtres">
+    <div class="row"><div class="search"><label for="q" class="vh">Rechercher un évènement</label><input id="q" type="search" placeholder="Parcoursup, salon, Cordées…" autocomplete="off"></div></div>
+    <div class="row" id="themes"><span class="lab">Thématiques</span></div>
+    <div class="row" id="publics"><span class="lab">Publics</span></div>
+    <div class="meta"><span id="count" aria-live="polite"></span><button class="linkbtn" id="reset">Réinitialiser les filtres</button></div>
+  </section>
+
+  <p class="srcinfo" id="srcinfo" aria-live="polite"></p>
+  <main id="list"></main>
+
+  <footer>Les dates signalées « date à confirmer » sont indicatives et seront précisées au fil des publications officielles. Les rendez-vous récurrents apparaissent en pointillés dans la frise et ne sont pas exportés vers l'agenda. DRAIO, région académique Île-de-France.</footer>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURATION : à renseigner une seule fois
+   gristUrl : adresse de votre instance Grist (sans / final)
+   docId    : identifiant du document (dans l'adresse du document Grist)
+   table    : identifiant du tableau (Evenements si vous importez le modèle)
+   statutPublie : seules les lignes dont la colonne Publication porte
+                  ce statut apparaissent dans l'agenda
+   Variante « fichier relais » : source:"json" et jsonUrl:"evenements.json"
+   Tant que docId est vide, la page affiche des données de démonstration.
+   ===================================================================== */
+const CONFIG={
+  source:"grist",
+  gristUrl:"https://grist.numerique.gouv.fr",
+  docId:"hWgZLNkdymjtuU5fiQXnQW",
+  table:"Evenements",
+  jsonUrl:"",
+  statutPublie:"Publié",
+  columns:{titre:"Titre",theme:"Thematique",debut:"Debut",fin:"Fin",periode:"Periode",description:"Description",publics:"Publics",echelle:"Echelle",confirme:"Confirme",recurrent:"Recurrent",lien:"Lien",publication:"Publication"}
+};
+const THEMES={
+  aff:{n:"Affectation et admission",c:"--t-aff"},
+  sem:{n:"Semaines thématiques",c:"--t-sem"},
+  sal:{n:"Salons et forums",c:"--t-sal"},
+  ega:{n:"Égalité des chances et décrochage",c:"--t-ega"},
+  met:{n:"Découverte des métiers et 4 demi-journées",c:"--t-met"},
+  eq:{n:"Immersion pour les équipes",c:"--t-eq"},
+  oni:{n:"Outils pédagogiques et Onisep",c:"--t-oni"},
+  ent:{n:"Relation école-entreprise et insertion pro",c:"--t-ent"}
+};
+const PUBLICS={col:"Collège",lyc:"Lycée",sup:"Supérieur",eq:"Équipes"};
+const ECH={nat:"National",reg:"Régional",aca:"Académique",eta:"Établissement"};
+const DEMO_EVENTS=[
+ {t:"aff",a:"2026-09-01",b:"2026-09-30",w:"Septembre",ti:"Commissions pour les élèves sans solution",d:"Affectation des élèves restés sans affectation à la rentrée.",p:["lyc","eq"],e:"aca"},
+ {t:"ega",a:"2026-09-15",b:"2026-10-31",w:"Septembre → octobre",ti:"Lancement des Cordées de la réussite",d:"Constitution des cordées et premières actions avec les établissements partenaires.",p:["col","lyc","sup"],e:"reg"},
+ {t:"sem",a:"2026-10-02",b:"2026-10-12",w:"Octobre",ti:"Fête de la science",d:"Visites de laboratoires, ateliers et rencontres avec des chercheurs.",p:["col","lyc"],e:"nat"},
+ {t:"ega",a:"2026-10-01",b:"2026-11-30",w:"Automne",ti:"Catalogue LDS 2026-2027",d:"Diffusion du recensement des dispositifs de lutte contre le décrochage scolaire en Île-de-France.",p:["eq"],e:"reg"},
+ {t:"aff",a:"2026-10-01",b:"2027-02-28",w:"Selon les lycées",ti:"Semaines de l'orientation en terminale",d:"Temps dédiés à la préparation des choix post-bac, fixés par chaque établissement.",p:["lyc"],e:"eta",rec:true},
+ {t:"ent",a:"2026-11-16",b:"2026-11-20",w:"Novembre",ti:"Semaine école-entreprise",d:"Rencontres entre élèves et professionnels, visites d'entreprises.",p:["col","lyc"],e:"nat"},
+ {t:"sem",a:"2026-11-16",b:"2026-11-22",w:"Novembre",ti:"Semaine européenne pour l'emploi des personnes handicapées",d:"Actions de sensibilisation et découverte de parcours inclusifs.",p:["col","lyc","sup"],e:"nat"},
+ {t:"sem",a:"2026-11-01",b:"2026-11-30",w:"Novembre",ti:"Mois de l'économie sociale et solidaire",d:"Découverte des métiers et des structures de l'ESS.",p:["col","lyc"],e:"nat"},
+ {t:"sal",a:"2026-11-19",b:"2026-11-22",w:"Novembre",ti:"Salon de l'Éducation",d:"Stand Onisep coordonné avec le groupe ERO de la DRAIO, public M1 INSPÉ.",p:["eq"],e:"nat"},
+ {t:"sal",a:"2026-11-01",b:"2027-01-31",w:"Novembre → janvier",ti:"Salons Studyrama et L'Étudiant",d:"Salons thématiques : grandes écoles, alternance, santé, formations artistiques.",p:["lyc","sup"],e:"reg"},
+ {t:"aff",a:"2026-12-17",b:"2027-01-14",w:"Mi-décembre",ti:"Parcoursup : ouverture du site d'information",d:"Consultation de l'offre de formation avant l'ouverture des vœux.",p:["lyc"],e:"nat"},
+ {t:"ent",a:"2026-12-01",b:"2027-02-28",w:"Décembre → février",ti:"Stages d'observation de 3e",d:"Calendrier propre à chaque collège.",p:["col"],e:"eta"},
+ {t:"aff",a:"2027-01-15",b:"2027-03-12",w:"Mi-janvier → mi-mars",ti:"Parcoursup : formulation des vœux",d:"Inscription et saisie des vœux sur la plateforme.",p:["lyc"],e:"nat"},
+ {t:"sal",a:"2027-01-08",b:"2027-01-10",w:"Janvier",ti:"Salon Postbac",d:"Grand salon francilien de l'enseignement supérieur.",p:["lyc"],e:"reg"},
+ {t:"sal",a:"2027-01-15",b:"2027-02-28",w:"Janvier → février",ti:"Nuits de l'orientation",d:"Soirées organisées par les CCI pour échanger avec des professionnels.",p:["col","lyc"],e:"reg"},
+ {t:"sal",a:"2027-01-15",b:"2027-03-31",w:"Janvier → mars",ti:"Journées portes ouvertes",d:"Lycées, CFA et établissements d'enseignement supérieur.",p:["col","lyc"],e:"eta"},
+ {t:"aff",a:"2027-02-01",b:"2027-03-31",w:"Février → mars",ti:"Intentions provisoires d'orientation",d:"Conseils de classe du 2e trimestre en 3e et en 2de.",p:["col","lyc"],e:"eta"},
+ {t:"aff",a:"2027-02-15",b:"2027-03-15",w:"Février → mars",ti:"Mon Master : candidatures",d:"Phase de candidature en première année de master.",p:["sup"],e:"nat"},
+ {t:"aff",a:"2027-02-01",b:"2027-03-31",w:"Février → mars",ti:"Immersions dans le supérieur",d:"Cours ouverts et journées d'immersion pour les lycéens.",p:["lyc"],e:"reg"},
+ {t:"eq",a:"2027-02-01",b:"2027-03-31",w:"Février → mars",ti:"Visites croisées collège-lycée",d:"Immersions de collégiens en lycée et visites réciproques des équipes.",p:["col","lyc","eq"],e:"aca"},
+ {t:"sem",a:"2027-03-15",b:"2027-03-21",w:"Mars",ti:"Semaine des mathématiques",d:"Thème national annuel, actions dans les établissements.",p:["col","lyc"],e:"nat"},
+ {t:"sem",a:"2027-03-22",b:"2027-03-27",w:"Mars",ti:"Semaine de la presse et des médias",d:"Découverte des métiers de l'information.",p:["col","lyc"],e:"nat"},
+ {t:"ega",a:"2027-03-08",b:"2027-03-08",w:"8 mars",ti:"Journée internationale des droits des femmes",d:"Actions pour l'égalité filles-garçons dans les choix d'orientation.",p:["col","lyc","sup"],e:"nat",ok:true},
+ {t:"sal",a:"2027-03-01",b:"2027-03-31",w:"Mars",ti:"Salons de l'apprentissage et de l'alternance",d:"Rencontres avec des CFA et des employeurs.",p:["lyc","sup"],e:"reg"},
+ {t:"aff",a:"2027-04-01",b:"2027-04-01",w:"Début avril",ti:"Parcoursup : confirmation des vœux",d:"Date limite pour compléter le dossier et confirmer les vœux.",p:["lyc"],e:"nat"},
+ {t:"sem",a:"2027-04-22",b:"2027-04-22",w:"Avril",ti:"Journée des filles dans les TIC",d:"Valoriser les filières du numérique auprès des filles.",p:["col","lyc"],e:"nat"},
+ {t:"aff",a:"2027-05-03",b:"2027-06-04",w:"Mai → juin",ti:"Affelnet lycée : saisie des vœux",d:"Vœux d'affectation des élèves de 3e et de 2de.",p:["col","lyc"],e:"aca"},
+ {t:"aff",a:"2027-05-03",b:"2027-06-15",w:"Mai → juin",ti:"Parcours en Y en terminale bac pro",d:"Choix entre poursuite d'études et insertion professionnelle.",p:["lyc"],e:"nat"},
+ {t:"sem",a:"2027-05-30",b:"2027-06-05",w:"Fin mai → début juin",ti:"Semaine européenne du développement durable",d:"Découverte des métiers de la transition écologique.",p:["col","lyc"],e:"nat"},
+ {t:"aff",a:"2027-06-02",b:"2027-07-10",w:"Début juin → mi-juillet",ti:"Parcoursup : phase principale d'admission",d:"Réception des propositions et réponses des candidats.",p:["lyc"],e:"nat"},
+ {t:"aff",a:"2027-06-10",b:"2027-09-10",w:"Juin → septembre",ti:"Parcoursup : phase complémentaire",d:"Nouveaux vœux sur les places disponibles.",p:["lyc"],e:"nat"},
+ {t:"ent",a:"2027-06-14",b:"2027-06-25",w:"Mi-juin",ti:"Séquence d'observation de 2de",d:"Deux semaines en milieu professionnel pour les élèves de 2de générale et technologique.",p:["lyc"],e:"nat"},
+ {t:"ega",a:"2027-06-01",b:"2027-06-30",w:"Juin",ti:"Bilans des Cordées de la réussite",d:"Rapport d'activité des référents via le formulaire Grist unique.",p:["eq"],e:"reg"},
+ {t:"aff",a:"2027-06-28",b:"2027-07-03",w:"Fin juin → début juillet",ti:"Résultats Affelnet",d:"Publication des résultats d'affectation en lycée.",p:["col","lyc"],e:"aca"},
+ {t:"met",a:"2026-10-05",b:"2027-05-28",w:"Selon les collèges",ti:"Demi-journées de découverte des métiers",d:"Quatre demi-journées de découverte des métiers organisées par chaque établissement.",p:["col"],e:"eta",rec:true},
+ {t:"oni",a:"2026-09-01",b:"2027-07-10",w:"Toute l'année",ti:"Avenir(s), la plateforme de l'Onisep",d:"Plateforme d'accompagnement à l'orientation déployée dans les trois académies.",p:["col","lyc","eq"],e:"reg",rec:true},
+ {t:"oni",a:"2026-12-01",b:"2027-01-31",w:"Hiver",ti:"Guides Onisep « Après la 3e » et « Après le bac »",d:"Diffusion des guides régionaux d'information sur les formations.",p:["col","lyc","eq"],e:"reg"},
+];
+let EVENTS=[];
+let LOAD={state:"loading"};
+/* ===== Fin des données ===== */
+
+const M=["Septembre","Octobre","Novembre","Décembre","Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août"];
+const MS=["Sept","Oct","Nov","Déc","Janv","Févr","Mars","Avr","Mai","Juin","Juil","Août"];
+const YEARS=[2026,2026,2026,2026,2027,2027,2027,2027,2027,2027,2027,2027];
+const PER={
+  annee:[{s:0,e:11,n:"2026-2027",sub:"Septembre → août"}],
+  sem:[{s:0,e:5,n:"1er semestre",sub:"Septembre → février"},{s:6,e:11,n:"2e semestre",sub:"Mars → août"}],
+  tri:[{s:0,e:2,n:"1er trimestre",sub:"Septembre → novembre"},{s:3,e:5,n:"2e trimestre",sub:"Décembre → février"},{s:6,e:8,n:"3e trimestre",sub:"Mars → mai"},{s:9,e:11,n:"4e trimestre",sub:"Juin → août"}]
+};
+const DAY=86400000;
+const D=s=>new Date(s+"T12:00:00");
+const mStart=i=>new Date(2026,8+i,1,12);
+const mEnd=i=>new Date(2026,9+i,0,12);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const mIdx=d=>(d.getFullYear()-2026)*12+d.getMonth()-8;
+const YSTART=new Date(2026,8,1,12),YEND=new Date(2027,7,31,12);
+function prepare(list){
+  let out=0;
+  const keep=list.filter(ev=>{if(!ev.a)return true;const A=D(ev.a),B=D(ev.b||ev.a);if(B<YSTART||A>YEND){out++;return false}return true});
+  keep.sort((x,y)=>(x.a||"9999").localeCompare(y.a||"9999"));
+  keep.forEach((ev,i)=>{ev.id=i;if(ev.a){ev.A=D(ev.a);ev.B=D(ev.b||ev.a);if(ev.B<ev.A)ev.B=ev.A;ev.m=clamp(mIdx(ev.A),0,11);ev.f=clamp(mIdx(ev.B),0,11)}else{ev.m=null;ev.f=null}});
+  return {list:keep,out};
+}
+const today=new Date();today.setHours(12,0,0,0);
+const NOW=mIdx(today);
+const isDone=ev=>ev.B&&ev.B<today;
+
+const st={view:"fil",gran:"tri",idx:0,themes:new Set(Object.keys(THEMES)),publics:new Set(),q:"",sel:null};
+try{const s=JSON.parse(localStorage.getItem("cal-orient-grist")||"null");if(s){if(["fil","frise"].includes(s.view))st.view=s.view;if(PER[s.gran])st.gran=s.gran;st.themes=new Set(s.themes.filter(k=>THEMES[k]));st.publics=new Set(s.publics.filter(k=>PUBLICS[k]));}}catch(e){}
+const save=()=>{try{localStorage.setItem("cal-orient-grist",JSON.stringify({view:st.view,gran:st.gran,themes:[...st.themes],publics:[...st.publics]}))}catch(e){}};
+const periodOf=(g,m)=>Math.max(0,PER[g].findIndex(p=>m>=p.s&&m<=p.e));
+st.idx=periodOf(st.gran,clamp(NOW,0,11));
+const P=()=>PER[st.gran][st.idx];
+
+const norm=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+function baseMatch(ev){
+  if(!st.themes.has(ev.t))return false;
+  if(st.publics.size&&!ev.p.some(p=>st.publics.has(p)))return false;
+  if(st.q){const h=norm(ev.ti+" "+ev.d+" "+ev.w+" "+THEMES[ev.t].n);if(!norm(st.q).split(/\s+/).every(w=>h.includes(w)))return false}
+  return true;
+}
+const inPeriod=(ev,p)=>ev.m===null?st.gran==="annee":(ev.m<=p.e&&ev.f>=p.s);
+const visible=()=>EVENTS.filter(ev=>baseMatch(ev)&&inPeriod(ev,P()));
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function controls(){
+  document.querySelectorAll("#vseg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===st.view));
+  document.querySelectorAll("#gseg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.g===st.gran));
+  const p=P();$("plabel").innerHTML=`${p.n}<small>${p.sub}</small>`;
+  $("prev").disabled=st.idx===0;$("next").disabled=st.idx===PER[st.gran].length-1;
+  $("pnav").style.visibility=st.gran==="annee"?"hidden":"visible";
+}
+function chips(){
+  const th=$("themes");th.querySelectorAll(".chip").forEach(c=>c.remove());
+  Object.entries(THEMES).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip";b.style.setProperty("--c",`var(${v.c})`);b.setAttribute("aria-pressed",st.themes.has(k));b.innerHTML=`<span class="dot"></span>${v.n}`;b.onclick=()=>{st.themes.has(k)?st.themes.delete(k):st.themes.add(k);save();render()};th.appendChild(b)});
+  const pu=$("publics");pu.querySelectorAll(".chip").forEach(c=>c.remove());
+  Object.entries(PUBLICS).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip";b.setAttribute("aria-pressed",st.publics.has(k));b.textContent=v;b.onclick=()=>{st.publics.has(k)?st.publics.delete(k):st.publics.add(k);save();render()};pu.appendChild(b)});
+}
+function card(ev,p){
+  const c=`var(${THEMES[ev.t].c})`,done=isDone(ev);
+  const tags=[`<span class="tag theme">${THEMES[ev.t].n}</span>`,...ev.p.map(x=>`<span class="tag">${PUBLICS[x]}</span>`),...(ev.e?[`<span class="tag">${ECH[ev.e]}</span>`]:[])];
+  if(p&&ev.m!==null&&ev.m<p.s)tags.push(`<span class="tag">Commencé en ${M[ev.m].toLowerCase()}</span>`);
+  if(ev.rec)tags.push(`<span class="tag">Récurrent</span>`);
+  if(!ev.ok)tags.push(`<span class="tag tbc">Date à confirmer</span>`);
+  if(done)tags.push(`<span class="tag done">Terminé</span>`);
+  return `<article class="ev${done?" done":""}" style="--c:${c}"><div class="top"><h3>${esc(ev.ti)}</h3><span class="when">${esc(ev.w)}</span></div><p class="desc">${esc(ev.d)}</p>${ev.url?`<a class="more" href="${esc(ev.url)}" target="_blank" rel="noopener">En savoir plus</a>`:""}<div class="tags">${tags.join("")}</div></article>`;
+}
+function renderFil(evs){
+  const p=P();let html="";
+  for(let i=p.s;i<=p.e;i++){const g=evs.filter(e=>e.m!==null&&Math.max(e.m,p.s)===i);if(!g.length)continue;
+    html+=`<section class="month${i===NOW?" isnow":""}"><h2>${M[i]}<small>${YEARS[i]}${i===NOW?", ce mois-ci":""}</small></h2><div class="events">${g.map(e=>card(e,p)).join("")}</div></section>`}
+  const tbd=evs.filter(e=>e.m===null);
+  if(tbd.length)html+=`<section class="month"><h2>À programmer<small>Dates à fixer</small></h2><div class="events">${tbd.map(e=>card(e,p)).join("")}</div></section>`;
+  return html;
+}
+function renderFrise(evs){
+  const p=P(),t0=mStart(p.s).getTime(),t1=mEnd(p.e).getTime()+DAY,tot=t1-t0;
+  const pct=t=>((t-t0)/tot*100);
+  const minW={annee:960,sem:760,tri:620}[st.gran];
+  let head="",lines="";
+  for(let i=p.s;i<=p.e;i++){const l=pct(mStart(i).getTime()),r=pct(mEnd(i).getTime()+DAY);
+    head+=`<div class="gmonth${i===NOW?" isnow":""}" style="left:${l}%;width:${r-l}%">${st.gran==="annee"?MS[i]:M[i]}</div>`;
+    if(i>p.s)lines+=`<div class="vline" style="left:${l}%"></div>`}
+  if(st.gran==="tri"){for(let t=t0;t<t1;t+=DAY){const d=new Date(t);if(d.getDay()===1&&d.getDate()!==1)lines+=`<div class="vline week" style="left:${pct(t)}%"></div>`}}
+  if(today.getTime()>=t0&&today.getTime()<t1)lines+=`<div class="vline today" style="left:${pct(today.getTime())}%"><span>Aujourd'hui</span></div>`;
+  let rows="";
+  Object.keys(THEMES).forEach(k=>{
+    const g=evs.filter(e=>e.t===k&&e.m!==null).sort((a,b)=>a.A-b.A);if(!g.length)return;
+    g.forEach((ev,j)=>{
+      const l=clamp(pct(ev.A.getTime()),0,100),r=clamp(pct(ev.B.getTime()+DAY),0,100),w=Math.max(r-l,0.8);
+      const cls="bar"+(ev.rec?" rec":"")+(isDone(ev)?" done":"");
+      const inside=w>=22;
+      let lab="";
+      if(!inside){lab=l+w>68?`<span class="blab" style="right:${100-l+0.6}%">${esc(ev.ti)}</span>`:`<span class="blab" style="left:${l+w+0.6}%">${esc(ev.ti)}</span>`}
+      rows+=`<div class="grow${j===0?" first":""}" style="--c:var(${THEMES[k].c})"><div class="glab">${j===0?`<b>${THEMES[k].n}</b>`:""}</div><div class="track"><button class="${cls}" data-id="${ev.id}" aria-pressed="${st.sel===ev.id}" style="left:${l}%;width:${w}%" title="${esc(ev.ti)}, ${esc(ev.w)}">${inside?esc(ev.ti):""}</button>${lab}</div></div>`;
+    });
+  });
+  const tbd=evs.filter(e=>e.m===null);
+  const sel=st.sel!==null?EVENTS[st.sel]:null;
+  return `<div class="gscroll"><div class="gantt" style="min-width:${minW}px"><div class="ghead"><div></div><div class="track">${head}</div></div>${rows}<div class="overlay">${lines}</div></div></div>
+  <div class="ghint">Touchez une barre pour afficher le détail de l'évènement.</div>
+  <div class="gdet" id="gdet">${sel&&evs.includes(sel)?card(sel,p):""}</div>
+  ${tbd.length?`<section class="month" style="margin-top:20px"><h2>À programmer<small>Dates à fixer</small></h2><div class="events">${tbd.map(e=>card(e,p)).join("")}</div></section>`:""}`;
+}
+function render(){
+  controls();chips();
+  const list=$("list"),info=$("srcinfo");
+  if(LOAD.state==="loading"){info.textContent="";$("count").textContent="";list.innerHTML=`<div class="empty">Chargement du calendrier…</div>`;return}
+  if(LOAD.state==="error"){info.textContent="";$("count").textContent="";list.innerHTML=`<div class="empty"><b>Le calendrier n'a pas pu être chargé depuis Grist.</b><br>Vérifiez que le document est partagé en lecture publique et que la configuration en tête du fichier est correcte. Détail technique : ${esc(LOAD.msg)}<br><button class="linkbtn" id="retry">Réessayer</button></div>`;$("retry").onclick=()=>{LOAD={state:"loading"};render();loadData()};return}
+  info.textContent=LOAD.state==="demo"?"Données de démonstration. Renseignez la configuration Grist en tête du fichier pour afficher le calendrier réel.":`Calendrier à jour, chargé depuis Grist à ${LOAD.at.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}.`+(LOAD.skipped?` ${LOAD.skipped} ligne${LOAD.skipped>1?"s":""} ignorée${LOAD.skipped>1?"s":""} (titre ou thématique manquant, ou date hors de l'année 2026-2027).`:"");
+  const evs=visible();
+  $("count").textContent=`${evs.length} évènement${evs.length>1?"s":""} sur la période`;
+  if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ne correspond à ces filtres sur cette période. Changez de période, ajoutez une thématique ou <button class="linkbtn" id="r2">réinitialisez les filtres</button>.</div>`;$("r2").onclick=resetAll;return}
+  list.innerHTML=st.view==="fil"?renderFil(evs):renderFrise(evs);
+  list.querySelectorAll(".bar").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;st.sel=st.sel===id?null:id;render();const g=$("gdet");if(g&&st.sel!==null)g.scrollIntoView({block:"nearest",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})});
+}
+function resetAll(){st.themes=new Set(Object.keys(THEMES));st.publics.clear();st.q="";$("q").value="";save();render()}
+
+document.querySelectorAll("#vseg button").forEach(b=>b.onclick=()=>{st.view=b.dataset.v;save();render()});
+document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{const cur=P(),ref=NOW>=cur.s&&NOW<=cur.e?NOW:cur.s;st.gran=b.dataset.g;st.idx=periodOf(st.gran,ref);st.sel=null;save();render()});
+$("prev").onclick=()=>{st.idx=Math.max(0,st.idx-1);st.sel=null;render()};
+$("next").onclick=()=>{st.idx=Math.min(PER[st.gran].length-1,st.idx+1);st.sel=null;render()};
+$("reset").onclick=resetAll;
+$("q").addEventListener("input",e=>{st.q=e.target.value.trim();render()});
+
+/* Lecture des évènements depuis Grist */
+const normK=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const byLabel=(obj,v)=>{const n=normK(v);return Object.keys(obj).find(k=>normK(obj[k].n||obj[k])===n||k===v)||null};
+function toISO(v){
+  if(v===null||v===undefined||v==="")return null;
+  if(typeof v==="number")return new Date(v*1000).toISOString().slice(0,10);
+  const s=String(v).trim();let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return m[0];
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;return null;
+}
+const toList=v=>{if(Array.isArray(v)){if(v[0]==="L")v=v.slice(1);return v.map(String)}return v?String(v).split(/[,;]/).map(x=>x.trim()).filter(Boolean):[]};
+const toBool=v=>v===true||/^(oui|true|vrai|1|x)$/i.test(String(v??"").trim());
+const shortD=iso=>D(iso).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+function fromGrist(f){
+  const C=CONFIG.columns,g=k=>f[C[k]];
+  const ti=String(g("titre")??"").trim(),t=byLabel(THEMES,g("theme"));
+  if(!ti||!t)return null;
+  const a=toISO(g("debut")),b=toISO(g("fin"))||a;
+  let w=String(g("periode")??"").trim();
+  if(!w)w=a?(a===b?shortD(a):`${shortD(a)} → ${shortD(b)}`):"Date à fixer";
+  const url=String(g("lien")??"").trim();
+  return {t,ti,a,b,w,d:String(g("description")??"").trim(),
+    p:toList(g("publics")).map(x=>byLabel(PUBLICS,x)).filter(Boolean),
+    e:byLabel(ECH,g("echelle")),ok:toBool(g("confirme")),rec:toBool(g("recurrent")),
+    url:/^https?:\/\//i.test(url)?url:""};
+}
+async function loadData(){
+  let url=null;
+  if(CONFIG.source==="json"&&CONFIG.jsonUrl)url=CONFIG.jsonUrl;
+  else if(CONFIG.gristUrl&&CONFIG.docId&&CONFIG.table)url=`${CONFIG.gristUrl.replace(/\/+$/,"")}/api/docs/${encodeURIComponent(CONFIG.docId)}/tables/${encodeURIComponent(CONFIG.table)}/records`;
+  if(!url){EVENTS=prepare(DEMO_EVENTS).list;LOAD={state:"demo"};render();return}
+  try{
+    const r=await fetch(url,{headers:{Accept:"application/json"},cache:"no-store"});
+    if(!r.ok)throw new Error(`réponse ${r.status} du serveur`);
+    const j=await r.json(),recs=Array.isArray(j)?j:(j.records||[]);
+    let bad=0;const evs=[];const pub=normK(CONFIG.statutPublie);
+    recs.forEach(rec=>{const f=rec.fields||rec;if(normK(f[CONFIG.columns.publication])!==pub)return;const ev=fromGrist(f);ev?evs.push(ev):bad++});
+    const res=prepare(evs);EVENTS=res.list;LOAD={state:"ok",at:new Date(),skipped:bad+res.out};
+  }catch(e){LOAD={state:"error",msg:e&&e.message?e.message:String(e)}}
+  render();
+}
+render();
+loadData();
+
+/* Export agenda (CSV compatible Google Agenda et Outlook) */
+const pad=n=>String(n).padStart(2,"0");
+const us=d=>`${pad(d.getMonth()+1)}/${pad(d.getDate())}/${d.getFullYear()}`;
+const csvq=s=>`"${String(s).replace(/"/g,'""')}"`;
+function buildCSV(evs){
+  const rows=[["Subject","Start Date","End Date","All Day Event","Description","Location","Private"]];
+  evs.forEach(ev=>{const desc=`${ev.w}. ${ev.d} Thématique : ${THEMES[ev.t].n}. Publics : ${ev.p.map(x=>PUBLICS[x]).join(", ")}.${ev.ok?"":" Date indicative, à confirmer."}`;
+    rows.push([ev.ti,us(ev.A),us(ev.B),"True",desc,"","False"])});
+  return "\uFEFF"+rows.map(r=>r.map(csvq).join(",")).join("\r\n");
+}
+/* Export PDF du fil ou de la frise (tracé vectoriel avec jsPDF) */
+const HEX={aff:"#5243C2",sem:"#0A7766",sal:"#B02E68",ega:"#3A7420",met:"#8F5B00",eq:"#245FA3",oni:"#B85300",ent:"#9E2A2B"};
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const tint=(h,k)=>rgb(h).map(v=>Math.round(v*k+255*(1-k)));
+const INK=[22,32,58],SLATE=[88,97,121],MUTED=[138,146,166],RULE=[220,224,232],NOWC=[214,51,42];
+const T=s=>String(s).replace(/→/g,"–").replace(/[“”]/g,'"').replace(/●/g,"");
+const fr=d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+function pdfHeader(doc,W,M){
+  const p=P();
+  const lw=32,lh=lw*136/265;
+  try{doc.addImage(document.getElementById("logo").src,"PNG",M-2,M-4,lw,lh)}catch(e){}
+  const y0=M-4+lh+5;
+  doc.setTextColor(...INK);doc.setFont("helvetica","bold");doc.setFontSize(18);doc.text(T("L'année de l'orientation 2026-2027"),M,y0+5);
+  doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(...SLATE);
+  doc.text(T(`${p.n} (${p.sub.toLowerCase()}), vue ${st.view==="fil"?"fil":"frise"}`),M,y0+11);
+  doc.text(T(`Édité le ${fr(today)}`),W-M,M+2,{align:"right"});
+  const th=st.themes.size===Object.keys(THEMES).length?"toutes":[...st.themes].map(k=>THEMES[k].n).join(", ");
+  const pu=st.publics.size?[...st.publics].map(k=>PUBLICS[k]).join(", "):"tous";
+  doc.setFontSize(8.5);doc.setTextColor(...MUTED);
+  const f=doc.splitTextToSize(T(`Thématiques : ${th}. Publics : ${pu}.${st.q?` Recherche : « ${st.q} ».`:""}`),W-2*M);
+  doc.text(f,M,y0+16);
+  let y=y0+16+f.length*3.6+2.5;
+  doc.setFontSize(8.5);doc.setFont("helvetica","normal");
+  let x=M;const LH=5,adv=w=>{if(x+w>W-M){x=M;y+=LH}};
+  Object.keys(THEMES).filter(k=>st.themes.has(k)).forEach(k=>{const lab=T(THEMES[k].n),w=4+doc.getTextWidth(lab)+7;adv(w);
+    doc.setFillColor(...rgb(HEX[k]));doc.circle(x+1.4,y-1,1.4,"F");doc.setTextColor(...INK);doc.text(lab,x+4,y);x+=w});
+  {const lab="Terminé",w=6+doc.getTextWidth(lab)+7;adv(w);doc.setFillColor(236,238,243);doc.rect(x,y-2.4,4.5,2.8,"F");doc.setFillColor(...MUTED);doc.rect(x,y-2.4,0.7,2.8,"F");doc.setTextColor(...SLATE);doc.text(lab,x+6,y);x+=w}
+  {const lab="Récurrent",w=6+doc.getTextWidth(lab);adv(w);doc.setDrawColor(...SLATE);doc.setLineWidth(0.25);doc.setLineDashPattern([0.8,0.6],0);doc.rect(x,y-2.4,4.5,2.8,"S");doc.setLineDashPattern([],0);doc.setTextColor(...SLATE);doc.text(lab,x+6,y);x+=w}
+  y+=3.5;doc.setDrawColor(...RULE);doc.setLineWidth(0.3);doc.line(M,y,W-M,y);return y+6;
+}
+function pdfFooter(doc,W,H,M){
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...MUTED);
+    doc.text(T("DRAIO, région académique Île-de-France. Dates indicatives sauf mention contraire."),M,H-7);doc.text(`${i} / ${n}`,W-M,H-7,{align:"right"})}
+}
+function tagLine(ev,p){
+  const t=[THEMES[ev.t].n,...ev.p.map(x=>PUBLICS[x]),...(ev.e?[ECH[ev.e]]:[])];
+  if(p&&ev.m!==null&&ev.m<p.s)t.push(`Commencé en ${M[ev.m].toLowerCase()}`);
+  if(ev.rec)t.push("Récurrent");if(!ev.ok)t.push("Date à confirmer");if(isDone(ev))t.push("Terminé");
+  return T(t.join("   |   "));
+}
+function pdfFil(evs){
+  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+  const W=210,H=297,MG=16,CW=W-2*MG,BOT=H-16;const p=P();
+  let y=pdfHeader(doc,W,MG);
+  const groups=[];
+  for(let i=p.s;i<=p.e;i++){const g=evs.filter(e=>e.m!==null&&Math.max(e.m,p.s)===i);if(g.length)groups.push([`${M[i]} ${YEARS[i]}`,g,i===NOW])}
+  const tbd=evs.filter(e=>e.m===null);if(tbd.length)groups.push(["À programmer",tbd,false]);
+  groups.forEach(([name,g,isNow])=>{
+    if(y+22>BOT){doc.addPage();y=MG}
+    doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(...INK);doc.text(T(name),MG,y);y+=5;
+    g.forEach(ev=>{
+      const done=isDone(ev),col=done?MUTED:rgb(HEX[ev.t]);
+      doc.setFont("helvetica","bold");doc.setFontSize(11);const tl=doc.splitTextToSize(T(ev.ti),CW-52);
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);const dl=doc.splitTextToSize(T(ev.d),CW-6);
+      doc.setFontSize(8);const gl=doc.splitTextToSize(tagLine(ev,p),CW-6);
+      const h=3+tl.length*4.8+dl.length*4.1+gl.length*3.5+3;
+      if(y+h>BOT){doc.addPage();y=MG}
+      doc.setFillColor(...(done?[245,246,249]:tint(HEX[ev.t],0.07)));doc.rect(MG,y,CW,h,"F");
+      doc.setFillColor(...col);doc.rect(MG,y,1.3,h,"F");
+      let yy=y+6;
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...(done?SLATE:INK));doc.text(tl,MG+4,yy);
+      doc.setFontSize(9);doc.setTextColor(...col);doc.text(T(ev.w),MG+CW-3,yy,{align:"right"});
+      yy+=tl.length*4.8-0.5;
+      doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...SLATE);doc.text(dl,MG+4,yy);yy+=dl.length*4.1;
+      doc.setFontSize(8);doc.setTextColor(...MUTED);doc.text(gl,MG+4,yy);
+      y+=h+2.5;
+    });
+    y+=4;
+  });
+  pdfFooter(doc,W,H,MG);return doc;
+}
+function pdfFrise(evs){
+  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"landscape"});
+  const W=297,H=210,MG=12,LW=46,X0=MG+LW,TW=W-MG-X0,RH=7,HH=8,BOT=H-14;const p=P();
+  const t0=mStart(p.s).getTime(),t1=mEnd(p.e).getTime()+DAY,tot=t1-t0,xp=t=>X0+(t-t0)/tot*TW;
+  const rows=[];Object.keys(THEMES).forEach(k=>{const g=evs.filter(e=>e.t===k&&e.m!==null).sort((a,b)=>a.A-b.A);g.forEach((ev,j)=>rows.push({k,ev,first:j===0}))});
+  let y,top,pageRows=0;
+  const startPage=first=>{if(!first)doc.addPage();y=first?pdfHeader(doc,W,MG):MG;top=y;
+    doc.setFontSize(9);doc.setFont("helvetica","bold");
+    for(let i=p.s;i<=p.e;i++){const a=xp(mStart(i).getTime()),b=xp(mEnd(i).getTime()+DAY);doc.setTextColor(...INK);doc.text(T(st.gran==="annee"?MS[i]:M[i]),a+1.5,y+5.2,{maxWidth:b-a-2})}
+    doc.setDrawColor(...RULE);doc.setLineWidth(0.3);doc.line(MG,y+HH,W-MG,y+HH);y+=HH;};
+  const endPage=()=>{const b=y;doc.setDrawColor(...RULE);doc.setLineWidth(0.2);
+    for(let i=p.s;i<=p.e;i++){const a=xp(mStart(i).getTime());doc.line(a,top,a,b)}
+    if(st.gran==="tri"){doc.setLineDashPattern([0.4,0.8],0);for(let t=t0;t<t1;t+=DAY){const d=new Date(t);if(d.getDay()===1&&d.getDate()!==1)doc.line(xp(t),top+HH,xp(t),b)}doc.setLineDashPattern([],0)}
+    doc.line(X0+TW,top,X0+TW,b);
+  };
+  startPage(true);
+  rows.forEach((r,i)=>{
+    const newPage=y+RH>BOT-4;if(newPage){endPage();startPage(false)}
+    const {ev,k}=r,c=HEX[k],done=isDone(ev);
+    if(r.first||newPage){doc.setDrawColor(...RULE);doc.setLineWidth(0.2);if(r.first)doc.line(MG,y,W-MG,y);
+      doc.setFillColor(...rgb(c));doc.circle(MG+1.5,y+3.4,1.2,"F");doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...INK);
+      doc.text(doc.splitTextToSize(T(THEMES[k].n),LW-8).slice(0,2),MG+4,y+4.3)}
+    const a=Math.max(xp(ev.A.getTime()),X0),b=Math.min(xp(ev.B.getTime()+DAY),X0+TW),w=Math.max(b-a,1.2),by=y+1,bh=RH-2;
+    if(ev.rec){doc.setDrawColor(...rgb(c));doc.setLineWidth(0.3);doc.setLineDashPattern([1,0.8],0);doc.rect(a,by,w,bh,"S");doc.setLineDashPattern([],0)}
+    else{doc.setFillColor(...(done?[236,238,243]:tint(c,0.22)));doc.rect(a,by,w,bh,"F")}
+    doc.setFillColor(...(done?MUTED:rgb(c)));doc.rect(a,by,0.9,bh,"F");
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);const lab=T(ev.ti),lw=doc.getTextWidth(lab);
+    if(lw+4<=w){doc.setTextColor(...(done?SLATE:INK));doc.text(lab,a+2,y+4.6)}
+    else if(b+1.5+lw<=X0+TW){doc.setTextColor(...SLATE);doc.text(lab,b+1.5,y+4.6)}
+    else{doc.setTextColor(...SLATE);doc.text(lab,a-1.5,y+4.6,{align:"right"})}
+    y+=RH;
+  });
+  endPage();
+  y+=8;doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...MUTED);
+  const tbd=evs.filter(e=>e.m===null);
+  if(tbd.length){y+=6;if(y>BOT){doc.addPage();y=MG}doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...INK);doc.text(T("À programmer"),MG,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...SLATE);tbd.forEach(e=>{y+=5;doc.text(T(`${e.ti} (${THEMES[e.t].n}) : ${e.d}`),MG,y,{maxWidth:W-2*MG})})}
+  pdfFooter(doc,W,H,MG);return doc;
+}
+
+(async()=>{
+  let dl=null;
+  if(window.claude&&window.claude.use){try{dl=await window.claude.use("downloads")}catch(e){}}
+  const standalone=!window.claude;
+  if(!dl&&!standalone)return;
+  $("exports").hidden=false;
+  const slug=()=>st.gran==="annee"?"annee":(st.gran==="sem"?"S":"T")+(st.idx+1);
+  const msg=t=>$("xmsg").textContent=t;
+  const fail=err=>{const c=err&&err.code;msg(c==="declined"?"Export annulé.":c==="rate_limited"?"Une fenêtre d'export est déjà ouverte.":c==="extension_not_enabled"?"Ce format n'est pas disponible ici.":"L'export n'a pas pu aboutir.")};
+  $("pdf").onclick=async()=>{
+    if(!window.jspdf){msg("Le module PDF n'a pas pu se charger. Rechargez la page.");return}
+    const evs=visible();if(!evs.length){msg("Aucun évènement à exporter sur cette sélection.");return}
+    msg("Préparation du PDF…");
+    let doc;try{doc=st.view==="fil"?pdfFil(evs):pdfFrise(evs)}catch(e){msg("La génération du PDF a échoué.");return}
+    const name=`orientation-2026-2027-${st.view}-${slug()}.pdf`;
+    if(!dl){doc.save(name);msg("");return}
+    try{await dl.save({filename:name,data:doc.output("blob")});msg(`PDF ${st.view==="fil"?"du fil":"de la frise"} exporté.`)}catch(err){fail(err)}
+  };
+  $("export").onclick=async()=>{
+    const evs=visible().filter(e=>e.m!==null&&!e.rec);
+    if(!evs.length){msg("Aucun évènement daté à exporter sur cette sélection.");return}
+    if(!dl){const u=URL.createObjectURL(new Blob([buildCSV(evs)],{type:"text/csv;charset=utf-8"})),lk=document.createElement("a");lk.href=u;lk.download=`orientation-2026-2027-${slug()}.csv`;document.body.appendChild(lk);lk.click();lk.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);msg(`${evs.length} évènement${evs.length>1?"s":""} exporté${evs.length>1?"s":""}. Importez le fichier dans Google Agenda ou Outlook.`);return}
+    msg("");
+    try{await dl.save({filename:`orientation-2026-2027-${slug()}.csv`,data:buildCSV(evs)});msg(`${evs.length} évènement${evs.length>1?"s":""} exporté${evs.length>1?"s":""}. Importez le fichier dans Google Agenda ou Outlook.`)}catch(err){fail(err)}
+  };
+})();
+</script>
+</body>
+</html>
