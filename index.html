@@ -46,6 +46,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--ink);outline-of
 .seg{display:inline-flex;border:1px solid var(--rule);border-radius:10px;padding:3px;background:var(--card)}
 .seg button{appearance:none;border:0;background:transparent;font:inherit;font-size:14px;color:var(--slate);padding:6px 12px;border-radius:7px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.acadbar{margin:14px 0 0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px;color:var(--slate)}
+.acadlab{font-weight:700;color:var(--slate)}
+.acadbtns{display:inline-flex;flex-wrap:wrap;gap:4px 14px}
+.acadbtns a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.acadbtns a:hover{text-decoration-thickness:2px}
+.acadbtns a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.acadbtns span{color:var(--muted)}
 .pnav{display:inline-flex;align-items:center;gap:4px}
 .pnav button{appearance:none;border:1px solid var(--rule);background:var(--card);color:var(--ink);width:34px;height:34px;border-radius:8px;font-size:18px;line-height:1;cursor:pointer}
 .pnav button:disabled{opacity:.35;cursor:default}
@@ -143,7 +150,12 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);max-width:72ch}
       <p>Dans le cadre du <strong>Plan Avenir</strong>, ils peuvent nourrir les <strong>quatre demi-journées Avenir</strong> et s'inscrire dans le <strong>plan pluriannuel d'éducation à l'orientation (PPO)</strong>, en s'appuyant sur la plateforme <strong>Avenir(s)</strong> de l'Onisep pour les préparer et en garder la trace.</p>
     </section>
     <p class="hint">Choisissez une période, une thématique ou un public, puis exportez la sélection en PDF ou vers votre agenda.</p>
+    <nav class="acadbar" aria-label="Actions spécifiques des académies">
+      <span class="acadlab">Actions spécifiques :</span>
+      <div class="acadbtns" id="acadbtns"></div>
+    </nav>
   </header>
+
 
   <div class="toolbar">
     <div class="seg" role="group" aria-label="Affichage" id="vseg">
@@ -186,6 +198,13 @@ footer{margin-top:48px;font-size:13px;color:var(--muted);max-width:72ch}
    Tant que docId est vide, la page affiche des données de démonstration.
    ===================================================================== */
 const CONFIG={
+  /* Liens vers les outils des académies : collez l'adresse entre les guillemets.
+     Tant qu'une adresse est vide, le bouton s'affiche « Bientôt disponible ». */
+  liensAcademies:{
+    "Créteil":"",
+    "Paris":"",
+    "Versailles":""
+  },
   titre:"Les temps forts de l'année 2026-2027", /* titre affiché en haut de la page et des PDF */
   source:"grist",
   gristUrl:"https://grist.numerique.gouv.fr",
@@ -200,8 +219,6 @@ const THEMES={
   sem:{n:"Semaines thématiques",c:"--t-sem"},
   sal:{n:"Salons et forums",c:"--t-sal"},
   met:{n:"Découverte des métiers",alias:["Découverte des métiers et 4 demi-journées"],c:"--t-met"},
-  eq:{n:"Actions pour les équipes éducatives",alias:["Immersion pour les équipes"],c:"--t-eq"},
-  oni:{n:"Actions pédagogie de l'orientation",alias:["Outils pédagogiques et Onisep"],c:"--t-oni"},
   ent:{n:"Insertion pro",alias:["Relation école-entreprise et insertion pro"],c:"--t-ent"},
   imm:{n:"Immersion et découverte formations",alias:["Immersion et découverte des formations"],c:"--t-imm"}
 };
@@ -418,6 +435,9 @@ async function loadData(){
   render();
 }
 (()=>{const t=CONFIG.titre.trim();document.title=t;const h=$("titre"),m=t.match(/^(.*?)\s+(\d{4}\s*[-–]\s*\d{4})$/);if(m){h.textContent=m[1];h.appendChild(document.createElement("br"));h.appendChild(document.createTextNode(m[2]))}else h.textContent=t})();
+(()=>{const box=$("acadbtns");Object.entries(CONFIG.liensAcademies||{}).forEach(([n,u])=>{u=String(u||"").trim();
+  if(/^https?:\/\//i.test(u)){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";a.innerHTML=`${esc(n)} ↗`;a.setAttribute("aria-label",`Accéder aux actions spécifiques de l'académie de ${n} (nouvel onglet)`);box.appendChild(a)}
+  else{const sp=document.createElement("span");sp.textContent=`${n} (bientôt)`;box.appendChild(sp)}})})();
 render();
 loadData();
 
@@ -549,7 +569,7 @@ function pdfFrise(evs){
   const standalone=!window.claude;
   if(!dl&&!standalone)return;
   $("exports").hidden=false;
-  const slug=()=>st.gran==="annee"?"annee":(st.gran==="sem"?"S":"T")+(st.idx+1);
+  const slug=()=>(st.gran==="annee"?"annee":(st.gran==="sem"?"S":"T")+(st.idx+1));
   const msg=t=>$("xmsg").textContent=t;
   const fail=err=>{const c=err&&err.code;msg(c==="declined"?"Export annulé.":c==="rate_limited"?"Une fenêtre d'export est déjà ouverte.":c==="extension_not_enabled"?"Ce format n'est pas disponible ici.":"L'export n'a pas pu aboutir.")};
   $("pdf").onclick=async()=>{
