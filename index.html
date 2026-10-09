@@ -189,7 +189,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 </header>
 <section class="hero">
   <div class="inner">
-    <h1 id="titre">Les temps forts de l'année<br>2026-2027</h1>
+    <h1 id="titre">Les temps forts de l'année 2026-2027</h1>
     <!-- PRÉAMBULE : vous pouvez modifier librement le texte des paragraphes ci-dessous -->
     <section class="preambule" aria-label="Préambule">
       <p class="lead">Salons, semaines thématiques, immersions, rencontres avec des professionnels : ces évènements aident chaque élève à découvrir des métiers et des formations, et à construire progressivement son projet d'avenir.</p>
@@ -483,7 +483,7 @@ async function loadData(){
   }catch(e){LOAD={state:"error",msg:e&&e.message?e.message:String(e)}}
   render();
 }
-(()=>{const t=CONFIG.titre.trim();document.title=t;const h=$("titre"),m=t.match(/^(.*?)\s+(\d{4}\s*[-–]\s*\d{4})$/);if(m){h.textContent=m[1];h.appendChild(document.createElement("br"));h.appendChild(document.createTextNode(m[2]))}else h.textContent=t})();
+(()=>{const t=CONFIG.titre.trim();document.title=t;$("titre").textContent=t})();
 (()=>{const box=$("acadbtns");Object.entries(CONFIG.liensAcademies||{}).forEach(([n,u])=>{u=String(u||"").trim();
   if(/^https?:\/\//i.test(u)){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";a.innerHTML=`${esc(n)} ↗`;a.setAttribute("aria-label",`Accéder aux actions spécifiques de l'académie de ${n} (nouvel onglet)`);box.appendChild(a)}
   else{const sp=document.createElement("span");sp.textContent=`${n} (bientôt)`;box.appendChild(sp)}})})();
