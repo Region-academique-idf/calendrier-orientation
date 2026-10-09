@@ -58,6 +58,9 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 .preambule p{margin:0;color:var(--ink);font-size:17px;line-height:1.6}
 .preambule p.lead{font-size:20px;line-height:1.5}
 .preambule strong{font-weight:700}
+.propose{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.btn-propose{color:var(--blue);text-decoration:underline;text-underline-offset:3px}
+.btn-propose:hover{text-decoration-thickness:2px}
 .hero p.hint{margin:20px 0 0;font-size:14px;color:var(--muted)}
 
 .wrap{max-width:1120px;margin:0 auto;padding:28px 24px 72px}
@@ -196,6 +199,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
       <p>Dans le cadre du <strong>Plan Avenir</strong>, ils peuvent nourrir les <strong>quatre demi-journées Avenir</strong> et s'inscrire dans le <strong>plan pluriannuel d'éducation à l'orientation (PPO)</strong>, en s'appuyant sur la plateforme <strong>Avenir(s)</strong> de l'Onisep pour les préparer et en garder la trace.</p>
     </section>
     <p class="hint">Choisissez une période, une thématique ou un public, puis exportez la sélection en PDF ou vers votre agenda.</p>
+    <p class="propose" id="propose" hidden><a id="proposeLink" class="btn-propose" target="_blank" rel="noopener">Proposer un évènement</a>, publié après validation.</p>
   </div>
 </section>
 <div class="wrap">
@@ -247,6 +251,9 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
    Tant que docId est vide, la page affiche des données de démonstration.
    ===================================================================== */
 const CONFIG={
+  /* Lien du formulaire Grist pour proposer un évènement.
+     Tant que l'adresse est vide, le bouton reste masqué. */
+  formulaireUrl:"https://grist.numerique.gouv.fr/o/draioidf/forms/tiwD5FpRovHpd6PX5NvUux/7",
   /* Liens vers les outils des académies : collez l'adresse entre les guillemets.
      Tant qu'une adresse est vide, le bouton s'affiche « Bientôt disponible ». */
   liensAcademies:{
@@ -488,6 +495,7 @@ async function loadData(){
   if(/^https?:\/\//i.test(u)){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";a.innerHTML=`${esc(n)} ↗`;a.setAttribute("aria-label",`Accéder aux actions spécifiques de l'académie de ${n} (nouvel onglet)`);box.appendChild(a)}
   else{const sp=document.createElement("span");sp.textContent=`${n} (bientôt)`;box.appendChild(sp)}})})();
 try{$("footlogo").src=$("logo").src}catch(e){}
+{const u=String(CONFIG.formulaireUrl||"").trim();if(/^https?:\/\//i.test(u)){$("proposeLink").href=u;$("proposeLink").setAttribute("aria-label","Proposer un évènement, publié après validation (nouvel onglet)");$("proposeLink").title="Votre proposition sera publiée après validation";$("propose").hidden=false}}
 render();
 loadData();
 
