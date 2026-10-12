@@ -32,7 +32,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);f
 a{color:var(--blue)}
 .vh{position:absolute;left:-9999px}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76F6;outline-offset:2px}
-.inner{max-width:1120px;margin:0 auto;padding:0 24px}
+.inner{max-width:1240px;margin:0 auto;padding:0 24px}
 
 /* En-tête institutionnel */
 .site-head{background:var(--paper);box-shadow:0 1px 0 var(--rule),0 6px 12px -8px rgba(0,0,18,.16)}
@@ -63,7 +63,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 .btn-propose:hover{text-decoration-thickness:2px}
 .hero p.hint{margin:20px 0 0;font-size:14px;color:var(--muted)}
 
-.wrap{max-width:1120px;margin:0 auto;padding:28px 24px 72px}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 24px 72px}
 
 /* Barre d'outils */
 .toolbar{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:0 0 8px}
@@ -81,8 +81,13 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 .exports{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .export{appearance:none;font:inherit;font-size:14px;font-weight:500;padding:8px 16px;border:1px solid var(--blue);background:var(--paper);color:var(--blue);cursor:pointer}
 .export:hover{background:var(--blue-alt)}
-#pdf{background:var(--blue);color:var(--on-blue)}
-#pdf:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
+.exports{align-items:center}
+.explab{font-size:14px;font-weight:500;color:var(--slate)}
+.pdfbtns{display:inline-flex}
+.pdfbtns .export{background:var(--blue);color:var(--on-blue);border-color:var(--blue);border-right-color:rgba(255,255,255,.35)}
+.pdfbtns .export:last-child{border-right-color:var(--blue)}
+.pdfbtns .export:hover{background:var(--blue-hover);border-color:var(--blue-hover)}
+#export{margin-left:8px}
 .xmsg{font-size:13px;color:var(--slate);width:100%;text-align:right;min-height:0}
 
 /* Filtres */
@@ -153,6 +158,9 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 .gdet .ev::before{display:none}
 .ghint{font-size:13px;color:var(--muted);margin-top:8px}
 
+.lieu{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--slate);margin:-6px 0 10px}
+.lieu svg{flex:none;margin-top:2px}
+
 /* Pied de page */
 .site-foot{border-top:2px solid var(--blue);background:var(--paper)}
 .site-foot .inner{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding-top:26px;padding-bottom:32px}
@@ -217,7 +225,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
       <div class="plabel" id="plabel" aria-live="polite"></div>
       <button id="next" aria-label="Période suivante">›</button>
     </div>
-    <div class="exports" id="exports" hidden><button class="export" id="pdf">Exporter en PDF</button><button class="export" id="export">Agenda (.csv)</button></div>
+    <div class="exports" id="exports" hidden><span class="explab">Exporter en PDF :</span><span class="pdfbtns" role="group" aria-label="Exporter en PDF"><button class="export" data-pdf="fil">Fil</button><button class="export" data-pdf="bloc">Blocs</button><button class="export" data-pdf="frise">Frise</button></span><button class="export" id="export">Agenda (.csv)</button></div>
     <div class="xmsg" id="xmsg" aria-live="polite"></div>
   </div>
 
@@ -251,11 +259,15 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
    Tant que docId est vide, la page affiche des données de démonstration.
    ===================================================================== */
 const CONFIG={
+  /* Adresse publique de l'agenda (QR code et lien en bas des PDF) */
+  urlEnLigne:"https://region-academique-idf.github.io/calendrier-orientation/",
+  /* Dates des Rendez-vous de l'orientation de l'Onisep affichées en bas des PDF */
+  rdvOnisep:"18 nov. · 16 déc. · 20 janv. · 17 févr. · 17 mars · 16 juin",
   /* Lien du formulaire Grist pour proposer un évènement.
      Tant que l'adresse est vide, le bouton reste masqué. */
   formulaireUrl:"https://grist.numerique.gouv.fr/o/draioidf/forms/tiwD5FpRovHpd6PX5NvUux/7",
   /* Liens vers les outils des académies : collez l'adresse entre les guillemets.
-     Tant qu'une adresse est vide, le bouton s'affiche « Bientôt disponible ». */
+     Tant qu'une adresse est vide, le lien s'affiche « (à venir) ». */
   liensAcademies:{
     "Créteil":"",
     "Paris":"",
@@ -268,7 +280,7 @@ const CONFIG={
   table:"Evenements",
   jsonUrl:"",
   statutPublie:"Publié",
-  columns:{titre:"Titre",theme:"Thematique",debut:"Debut",fin:"Fin",periode:"Periode",description:"Description",publics:"Publics",echelle:"Echelle",confirme:"Confirme",recurrent:"Recurrent",lien:"Lien",publication:"Publication"}
+  columns:{titre:"Titre",theme:"Thematique",debut:"Debut",fin:"Fin",periode:"Periode",description:"Description",publics:"Publics",echelle:"Echelle",confirme:"Confirme",recurrent:"Recurrent",lien:"Lien",publication:"Publication",lieu:"Lieu",lat:"Latitude",lon:"Longitude",precision:"Precision"}
 };
 const THEMES={
   aff:{n:"Procédures",alias:["Affectation et admission"],c:"--t-aff"},
@@ -364,7 +376,7 @@ function baseMatch(ev){
   return true;
 }
 const inPeriod=(ev,p)=>ev.m===null?st.gran==="annee":(ev.m<=p.e&&ev.f>=p.s);
-const visible=()=>EVENTS.filter(ev=>baseMatch(ev)&&inPeriod(ev,P()));
+const visible=()=>st.day?EVENTS.filter(ev=>baseMatch(ev)&&ev.A&&ev.A<=st.day&&ev.B>=st.day):EVENTS.filter(ev=>baseMatch(ev)&&inPeriod(ev,P()));
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -389,7 +401,7 @@ function card(ev,p){
   if(ev.rec)tags.push(`<span class="tag">Récurrent</span>`);
   if(!ev.ok)tags.push(`<span class="tag tbc">Date à confirmer</span>`);
   if(done)tags.push(`<span class="tag done">Terminé</span>`);
-  return `<article class="ev${done?" done":""}" style="--c:${c}"><div class="top"><h3>${esc(ev.ti)}</h3><span class="when">${esc(ev.w)}</span></div><p class="desc">${esc(ev.d)}</p>${ev.url?`<a class="more" href="${esc(ev.url)}" target="_blank" rel="noopener">En savoir plus</a>`:""}<div class="tags">${tags.join("")}</div></article>`;
+  return `<article class="ev${done?" done":""}" id="ev-${ev.id}" style="--c:${c}"><div class="top"><h3>${esc(ev.ti)}</h3><span class="when">${esc(ev.w)}</span></div><p class="desc">${esc(ev.d)}</p>${ev.lieu?`<p class="lieu"><svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" fill="currentColor"/></svg>${esc(ev.lieu)}</p>`:""}${ev.url?`<a class="more" href="${esc(ev.url)}" target="_blank" rel="noopener">En savoir plus</a>`:""}<div class="tags">${tags.join("")}</div></article>`;
 }
 function renderFil(evs){
   const p=P();let html="";
@@ -435,6 +447,10 @@ function render(){
   if(LOAD.state==="error"){info.textContent="";$("count").textContent="";list.innerHTML=`<div class="empty"><b>Le calendrier n'a pas pu être chargé depuis Grist.</b><br>Vérifiez que le document est partagé en lecture publique et que la configuration en tête du fichier est correcte. Détail technique : ${esc(LOAD.msg)}<br><button class="linkbtn" id="retry">Réessayer</button></div>`;$("retry").onclick=()=>{LOAD={state:"loading"};render();loadData()};return}
   info.textContent=LOAD.state==="demo"?"Données de démonstration. Renseignez la configuration Grist en tête du fichier pour afficher le calendrier réel.":`Calendrier à jour, chargé depuis Grist à ${LOAD.at.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}.`+(LOAD.skipped?` ${LOAD.skipped} ligne${LOAD.skipped>1?"s":""} ignorée${LOAD.skipped>1?"s":""} (titre ou thématique manquant, ou date hors de l'année 2026-2027).`:"");
   const evs=visible();
+  if(st.day){const dl=st.day.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    $("count").innerHTML=`${evs.length} évènement${evs.length>1?"s":""}<span class="daychip">${esc(dl)}<button id="dayx" aria-label="Revenir à la période">×</button></span>`;$("dayx").onclick=()=>{st.day=null;render()};
+    if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ce jour-là avec les filtres choisis. <button class="linkbtn" id="dx2">Revenir à la période</button></div>`;$("dx2").onclick=()=>{st.day=null;render()};return}
+    list.innerHTML=`<section class="month"><h2>${st.day.getDate()} ${M[mIdx(st.day)].toLowerCase()}<small>${(w=>w[0].toUpperCase()+w.slice(1))(st.day.toLocaleDateString("fr-FR",{weekday:"long"}))} · ${st.day.getFullYear()}</small></h2><div class="events">${evs.map(e=>card(e,null)).join("")}</div></section>`;return}
   $("count").textContent=`${evs.length} évènement${evs.length>1?"s":""} sur la période`;
   if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ne correspond à ces filtres sur cette période. Changez de période, ajoutez une thématique ou <button class="linkbtn" id="r2">réinitialisez les filtres</button>.</div>`;$("r2").onclick=resetAll;return}
   list.innerHTML=st.view==="fil"?renderFil(evs):renderFrise(evs);
@@ -442,10 +458,10 @@ function render(){
 }
 function resetAll(){st.themes=new Set(Object.keys(THEMES));st.publics.clear();st.q="";$("q").value="";save();render()}
 
-document.querySelectorAll("#vseg button").forEach(b=>b.onclick=()=>{st.view=b.dataset.v;save();render()});
-document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{const cur=P(),ref=NOW>=cur.s&&NOW<=cur.e?NOW:cur.s;st.gran=b.dataset.g;st.idx=periodOf(st.gran,ref);st.sel=null;save();render()});
-$("prev").onclick=()=>{st.idx=Math.max(0,st.idx-1);st.sel=null;render()};
-$("next").onclick=()=>{st.idx=Math.min(PER[st.gran].length-1,st.idx+1);st.sel=null;render()};
+document.querySelectorAll("#vseg button").forEach(b=>b.onclick=()=>{st.view=b.dataset.v;st.day=null;save();render()});
+document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{const cur=P(),ref=NOW>=cur.s&&NOW<=cur.e?NOW:cur.s;st.gran=b.dataset.g;st.idx=periodOf(st.gran,ref);st.sel=null;st.day=null;save();render()});
+$("prev").onclick=()=>{st.idx=Math.max(0,st.idx-1);st.sel=null;st.day=null;render()};
+$("next").onclick=()=>{st.idx=Math.min(PER[st.gran].length-1,st.idx+1);st.sel=null;st.day=null;render()};
 $("reset").onclick=resetAll;
 $("q").addEventListener("input",e=>{st.q=e.target.value.trim();render()});
 
@@ -461,6 +477,7 @@ function toISO(v){
 const toList=v=>{if(Array.isArray(v)){if(v[0]==="L")v=v.slice(1);return v.map(String)}return v?String(v).split(/[,;]/).map(x=>x.trim()).filter(Boolean):[]};
 const toBool=v=>v===true||/^(oui|true|vrai|1|x)$/i.test(String(v??"").trim());
 const shortD=iso=>D(iso).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+const toNum=v=>{if(v===null||v===undefined||v==="")return null;const n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:null};
 function fromGrist(f){
   const C=CONFIG.columns,g=k=>f[C[k]];
   const one=v=>Array.isArray(v)?toList(v)[0]:v;
@@ -473,7 +490,8 @@ function fromGrist(f){
   return {t,ti,a,b,w,d:String(g("description")??"").trim(),
     p:toList(g("publics")).map(x=>byLabel(PUBLICS,x)).filter(Boolean),
     e:byLabel(ECH,one(g("echelle"))),ok:toBool(g("confirme")),rec:toBool(g("recurrent")),
-    url:/^https?:\/\//i.test(url)?url:""};
+    url:/^https?:\/\//i.test(url)?url:"",
+    lieu:String(g("lieu")??"").trim(),pr:String(g("precision")??"").trim(),lat:toNum(g("lat")),lon:toNum(g("lon"))};
 }
 async function loadData(){
   let url=null;
@@ -493,7 +511,10 @@ async function loadData(){
 (()=>{const t=CONFIG.titre.trim();document.title=t;$("titre").textContent=t})();
 (()=>{const box=$("acadbtns");Object.entries(CONFIG.liensAcademies||{}).forEach(([n,u])=>{u=String(u||"").trim();
   if(/^https?:\/\//i.test(u)){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";a.innerHTML=`${esc(n)} ↗`;a.setAttribute("aria-label",`Accéder aux actions spécifiques de l'académie de ${n} (nouvel onglet)`);box.appendChild(a)}
-  else{const sp=document.createElement("span");sp.textContent=`${n} (bientôt)`;box.appendChild(sp)}})})();
+  else{const sp=document.createElement("span");sp.textContent=`${n} (à venir)`;box.appendChild(sp)}})})();
+
+st.day=null;
+
 try{$("footlogo").src=$("logo").src}catch(e){}
 {const u=String(CONFIG.formulaireUrl||"").trim();if(/^https?:\/\//i.test(u)){$("proposeLink").href=u;$("proposeLink").setAttribute("aria-label","Proposer un évènement, publié après validation (nouvel onglet)");$("proposeLink").title="Votre proposition sera publiée après validation";$("propose").hidden=false}}
 render();
@@ -514,6 +535,7 @@ const HEX={aff:"#1E5BC6",sem:"#00838F",sal:"#B5179E",met:"#D9650B",ent:"#C62828"
 const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const tint=(h,k)=>rgb(h).map(v=>Math.round(v*k+255*(1-k)));
 const INK=[22,22,22],SLATE=[58,58,58],MUTED=[102,102,102],RULE=[221,221,221],NOWC=[225,0,15],BLUE=[0,0,145];
+let PDFV="fil";
 const T=s=>String(s).replace(/→/g,"–").replace(/[“”]/g,'"').replace(/●/g,"");
 const fr=d=>`${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
 function pdfHeader(doc,W,M){
@@ -523,7 +545,7 @@ function pdfHeader(doc,W,M){
   const y0=M-4+lh+5;
   doc.setTextColor(...BLUE);doc.setFont("helvetica","bold");doc.setFontSize(18);doc.text(T(CONFIG.titre),M,y0+5);
   doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(...SLATE);
-  doc.text(T(`${p.n} (${p.sub.toLowerCase()}), vue ${st.view==="fil"?"fil":"frise"}`),M,y0+11);
+  doc.text(T(`${p.n} (${p.sub.toLowerCase()}), vue ${PDFV}`),M,y0+11);
   doc.text(T(`Édité le ${fr(today)}`),W-M,M+2,{align:"right"});
   const th=st.themes.size===Object.keys(THEMES).length?"toutes":[...st.themes].map(k=>THEMES[k].n).join(", ");
   const pu=st.publics.size?[...st.publics].map(k=>PUBLICS[k]).join(", "):"tous";
@@ -550,7 +572,117 @@ function tagLine(ev,p){
   if(ev.rec)t.push("Récurrent");if(!ev.ok)t.push("Date à confirmer");if(isDone(ev))t.push("Terminé");
   return T(t.join("   |   "));
 }
-function pdfFil(evs){
+/* Export du fil au format du recto « Temps forts » */
+const QR_PNG="data:image/png;base64,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";
+const RN=[26,35,64],RT=[63,72,96],RR=[201,206,217],RL=[47,93,168],RO=[196,102,26],RBOX=[238,241,246],RDASH=[74,84,112];
+function rectoShort(ev,doc,w){
+  let t=ev.pr||ev.lieu||"";
+  if(!t){t=(ev.d||"").split(/(?<=[.!?])\s/)[0].replace(/\.$/,"")}
+  t=T(t);if(!t)return "";
+  if(doc.getTextWidth(t)<=w)return t;
+  while(t.length>3&&doc.getTextWidth(t+"…")>w)t=t.slice(0,-1);
+  return t.replace(/[\s,;:·-]+$/,"")+"…";
+}
+function pdfBloc(evs){
+  const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+  const W=210,H=297,ML=11.6,MT=9,MB=11,CW=W-2*ML,BOT=H-MB;
+  const LBL=22.8,GAP=1.6,X0=ML+LBL+2.6,CWC=W-ML-X0;
+  const p=P();
+  const used=[...new Set(evs.map(e=>e.t))];const themes=Object.keys(THEMES).filter(k=>used.includes(k));
+  const tm=(()=>{const m=String(CONFIG.titre).trim().match(/^(.*?)\s+(\d{4}\s*[-–]\s*\d{4})$/);return m?[m[1],m[2]]:[String(CONFIG.titre),""]})();
+  const sel=(()=>{let s=st.day?st.day.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):(st.gran==="annee"?"Année scolaire, septembre à août":`${p.n}, ${p.sub.toLowerCase().replace("→","à")}`);
+    const f=[];if(st.themes.size<Object.keys(THEMES).length)f.push("Thématiques : "+[...st.themes].map(k=>THEMES[k].n).join(", "));
+    if(st.publics.size)f.push("Publics : "+[...st.publics].map(k=>PUBLICS[k]).join(", "));if(st.q)f.push(`Recherche : « ${st.q} »`);
+    return T(s.charAt(0).toUpperCase()+s.slice(1)+(f.length?" · "+f.join(" · "):""))})();
+  function legend(y){
+    doc.setDrawColor(...RR);doc.setLineWidth(0.26);doc.line(ML,y,W-ML,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    const right="* date prévisionnelle, à confirmer",rw=doc.getTextWidth(right);
+    let x=ML,yy=y+5.1;const lines=[];
+    themes.forEach(k=>{const lab=T(THEMES[k].n),w=5.8+1.6+doc.getTextWidth(lab)+5.3;
+      if(x+w>W-ML-(lines.length?0:0)){x=ML;yy+=5.4}
+      drawSwatch(k,x,yy-3.2,5.8,3.7);doc.setTextColor(...RN);doc.text(lab,x+7.4,yy);x+=w});
+    if(x+rw>W-ML){x=ML;yy+=5.4}
+    doc.setTextColor(...RT);doc.text(right,W-ML,yy,{align:"right"});
+    const yb=yy+2.6;doc.setDrawColor(...RR);doc.line(ML,yb,W-ML,yb);return yb+3;
+  }
+  function drawSwatch(k,x,y,w,h){
+    if(k==="aff"){doc.setFillColor(255,255,255);doc.setDrawColor(...RDASH);doc.setLineWidth(0.38);doc.setLineDashPattern([0.9,0.7],0);doc.roundedRect(x,y,w,h,0.8,0.8,"FD");doc.setLineDashPattern([],0)}
+    else{doc.setFillColor(...tint(HEX[k],0.16));doc.setDrawColor(...rgb(HEX[k]));doc.setLineWidth(0.26);doc.roundedRect(x,y,w,h,0.8,0.8,"FD")}
+  }
+  function header(first){
+    let y=MT;
+    if(first){
+      let lw=0,lh=14.8;try{const src=document.getElementById("logo").src,ip=doc.getImageProperties(src);lw=lh*ip.width/ip.height;doc.addImage(src,"PNG",ML,y,lw,lh)}catch(e){lw=0}
+      const sx=ML+lw+4.2;if(lw){doc.setDrawColor(...RR);doc.setLineWidth(0.26);doc.line(sx,y+1.5,sx,y+lh-1.5)}
+      doc.setFont("helvetica","bold");doc.setFontSize(11.25);doc.setTextColor(...RN);doc.text("DRAIO et DRAFPIC",sx+4.2,y+6.3);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...RT);doc.text(T("Information, orientation et formation professionnelle"),sx+4.2,y+10.6);
+      y+=lh+9.5;
+      let fs=24.75;doc.setFont("helvetica","bold");
+      const tw=()=>{doc.setFontSize(fs);return doc.getTextWidth(T(tm[0]))+(tm[1]?3.2+doc.getTextWidth(tm[1]):0)};
+      while(tw()>CW&&fs>14)fs-=0.5;
+      doc.setTextColor(...RN);doc.text(T(tm[0]),ML,y);if(tm[1]){doc.setTextColor(...RO);doc.text(tm[1],ML+doc.getTextWidth(T(tm[0]))+3.2,y)}
+      y+=6.2;doc.setFont("helvetica","normal");doc.setFontSize(11.25);doc.setTextColor(...RT);
+      const sl=doc.splitTextToSize(sel,CW);doc.text(sl,ML,y);y+=(sl.length-1)*4.8+3.6;
+    }else{
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(...RN);doc.text(T(CONFIG.titre)+" (suite)",ML,y+4);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...RT);doc.text(doc.splitTextToSize(sel,CW)[0],ML,y+8.5);y+=11.5;
+    }
+    return legend(y);
+  }
+  function cardH(ev,w){
+    doc.setFont("helvetica","bold");doc.setFontSize(9.75);const tl=doc.splitTextToSize(T(ev.ti),w-4.8).slice(0,3);
+    doc.setFont("helvetica","normal");doc.setFontSize(9);const sh=rectoShort(ev,doc,w-4.8);
+    return {tl,sh,h:1.4+3.4+tl.length*4.05+(sh?3.7:0)+1.2};
+  }
+  function drawCard(ev,x,y,w,h,c){
+    if(ev.t==="aff"){doc.setFillColor(255,255,255);doc.setDrawColor(...RDASH);doc.setLineWidth(0.4);doc.setLineDashPattern([1,0.8],0);doc.roundedRect(x,y,w,h,1.3,1.3,"FD");doc.setLineDashPattern([],0)}
+    else{doc.setFillColor(...tint(HEX[ev.t],0.16));doc.setDrawColor(...rgb(HEX[ev.t]));doc.setLineWidth(0.26);doc.roundedRect(x,y,w,h,1.3,1.3,"FD")}
+    let yy=y+1.4+2.9;
+    doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(...(ev.t==="aff"?RN:rgb(HEX[ev.t])));doc.text(T(ev.w)+(ev.ok?"":"*"),x+2.4,yy,{charSpace:0.05});
+    yy+=4.1;doc.setFontSize(9.75);doc.setTextColor(...RN);doc.text(c.tl,x+2.4,yy);yy+=(c.tl.length-1)*4.05+3.8;
+    if(c.sh){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...RT);doc.text(c.sh,x+2.4,yy)}
+    if(ev.url)doc.link(x,y,w,h,{url:ev.url});
+  }
+  const groups=[];
+  if(st.day){groups.push([`${st.day.getDate()} ${MS[mIdx(st.day)]}`,evs])}
+  else{for(let i=p.s;i<=p.e;i++){const g=evs.filter(e=>e.m!==null&&Math.max(e.m,p.s)===i);if(g.length)groups.push([M[i],g])}}
+  const tbd=st.day?[]:evs.filter(e=>e.m===null);if(tbd.length)groups.push(["À programmer",tbd]);
+  let y=header(true);
+  groups.forEach(([name,g])=>{
+    const rows=[];for(let i=0;i<g.length;i+=4)rows.push(g.slice(i,i+4));
+    rows.forEach((r,ri)=>{
+      const w=(CWC-(r.length-1)*GAP)/r.length,cs=r.map(ev=>cardH(ev,w)),h=Math.max(...cs.map(c=>c.h));
+      if(y+h>BOT){doc.addPage();y=header(false)}
+      if(ri===0||y<MT+30){doc.setDrawColor(...RN);doc.setLineWidth(0.53);doc.line(ML,y,ML+LBL,y);
+        {doc.setFont("helvetica","bold");let fs=9,cs=0.3;const lab=T(name).toUpperCase();doc.setFontSize(fs);while(doc.getTextWidth(lab)+cs*lab.length>LBL-1&&(cs>0||fs>7)){if(cs>0)cs=Math.max(0,cs-0.05);else{fs-=0.25;doc.setFontSize(fs)}}doc.setTextColor(...RN);doc.text(lab,ML,y+4.6,{charSpace:cs})}}
+      r.forEach((ev,j)=>drawCard(ev,X0+j*(w+GAP),y,w,h,cs[j]));
+      y+=h+(ri<rows.length-1?GAP:1.1);
+    });
+  });
+  // Encadré final
+  doc.setFont("helvetica","normal");doc.setFontSize(9);
+  const colW=(CW-8.4-5.3)/2,desc=doc.splitTextToSize(T("Visioconférences de chercheurs et d'experts pour les équipes, le mercredi de 14h à 15h"),colW);
+  const dates=doc.splitTextToSize(T(CONFIG.rdvOnisep||""),colW);
+  const boxH=Math.max(3.2+4.4+desc.length*3.8+dates.length*3.8+4.4+2.4,3.2+20+3.2);
+  if(y+2+boxH>BOT){doc.addPage();y=header(false)}
+  const by=Math.max(y+2,BOT-boxH);
+  doc.setFillColor(...RBOX);doc.roundedRect(ML,by,CW,boxH,1.6,1.6,"F");
+  let lx=ML+4.2,ly=by+3.2+3.4;
+  doc.setFont("helvetica","bold");doc.setFontSize(10.5);doc.setTextColor(...RN);doc.text(T("Rendez-vous de l'orientation de l'Onisep"),lx,ly);ly+=4.6;
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...RT);doc.text(desc,lx,ly);ly+=desc.length*3.8+0.6;
+  doc.setTextColor(...RN);doc.text(dates,lx,ly);ly+=dates.length*3.8+0.6;
+  doc.setFont("helvetica","bold");doc.setTextColor(...RL);doc.textWithLink(T("Programme et replays sur onisep.fr"),lx,ly,{url:"https://www.onisep.fr/avenir-s/accompagner-les-eleves/une-offre-de-formations/les-rendez-vous-de-l-orientation"});
+  const rx=ML+4.2+colW+5.3,qs=20;
+  try{doc.addImage(QR_PNG,"PNG",rx,by+(boxH-qs)/2,qs,qs)}catch(e){}
+  let ry=by+(boxH-qs)/2+3.6,tx=rx+qs+3.2,tw2=W-ML-4.2-tx;
+  doc.setFont("helvetica","bold");doc.setFontSize(10.5);doc.setTextColor(...RN);doc.text(T("Tout le calendrier en ligne"),tx,ry);ry+=4.4;
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(...RT);const t2=doc.splitTextToSize(T("Filtres par période, thématique et public, export PDF et agenda"),tw2);doc.text(t2,tx,ry);ry+=t2.length*3.8+0.6;
+  doc.setFont("helvetica","bold");doc.setTextColor(...RL);const ud=String(CONFIG.urlEnLigne).replace(/^https?:\/\//,"").replace(/\/$/,"");let ul=[ud];if(doc.getTextWidth(ud)>tw2){const k=ud.indexOf("/");ul=k>0?[ud.slice(0,k+1),ud.slice(k+1)]:doc.splitTextToSize(ud,tw2)}doc.text(ul,tx,ry);doc.link(tx,ry-3,tw2,ul.length*3.8,{url:CONFIG.urlEnLigne});
+  const n=doc.getNumberOfPages();if(n>1)for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(...RT);doc.text(`${i} / ${n}`,W-ML,H-4.5,{align:"right"})}
+  return doc;
+}
+function pdfListe(evs){
   const doc=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
   const W=210,H=297,MG=16,CW=W-2*MG,BOT=H-16;const p=P();
   let y=pdfHeader(doc,W,MG);
@@ -630,15 +762,16 @@ function pdfFrise(evs){
   const slug=()=>(st.gran==="annee"?"annee":(st.gran==="sem"?"S":"T")+(st.idx+1));
   const msg=t=>$("xmsg").textContent=t;
   const fail=err=>{const c=err&&err.code;msg(c==="declined"?"Export annulé.":c==="rate_limited"?"Une fenêtre d'export est déjà ouverte.":c==="extension_not_enabled"?"Ce format n'est pas disponible ici.":"L'export n'a pas pu aboutir.")};
-  $("pdf").onclick=async()=>{
+  document.querySelectorAll("[data-pdf]").forEach(btn=>btn.onclick=async()=>{
+    const kind=btn.dataset.pdf;PDFV=kind==="frise"?"frise":"fil";
     if(!window.jspdf){msg("Le module PDF n'a pas pu se charger. Rechargez la page.");return}
     const evs=visible();if(!evs.length){msg("Aucun évènement à exporter sur cette sélection.");return}
     msg("Préparation du PDF…");
-    let doc;try{doc=st.view==="fil"?pdfFil(evs):pdfFrise(evs)}catch(e){msg("La génération du PDF a échoué.");return}
-    const name=`agenda-2026-2027-${st.view}-${slug()}.pdf`;
+    let doc;try{doc=kind==="fil"?pdfListe(evs):kind==="bloc"?pdfBloc(evs):pdfFrise(evs)}catch(e){msg("La génération du PDF a échoué.");return}
+    const name=`agenda-2026-2027-${kind==="bloc"?"blocs":kind}-${slug()}.pdf`;
     if(!dl){doc.save(name);msg("");return}
-    try{await dl.save({filename:name,data:doc.output("blob")});msg(`PDF ${st.view==="fil"?"du fil":"de la frise"} exporté.`)}catch(err){fail(err)}
-  };
+    try{await dl.save({filename:name,data:doc.output("blob")});msg(`PDF exporté (${kind==="fil"?"fil":kind==="bloc"?"blocs":"frise"}).`)}catch(err){fail(err)}
+  });
   $("export").onclick=async()=>{
     const evs=visible().filter(e=>e.m!==null&&!e.rec);
     if(!evs.length){msg("Aucun évènement daté à exporter sur cette sélection.");return}
