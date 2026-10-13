@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Les temps forts de l'année 2026-2027</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 @font-face{font-family:"Marianne";src:url("https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/fonts/Marianne-Regular.woff2") format("woff2"),url("https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/fonts/Marianne-Regular.woff") format("woff");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"Marianne";src:url("https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/fonts/Marianne-Medium.woff2") format("woff2"),url("https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.1/dist/fonts/Marianne-Medium.woff") format("woff");font-weight:500;font-style:normal;font-display:swap}
@@ -161,6 +163,42 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
 .lieu{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--slate);margin:-6px 0 10px}
 .lieu svg{flex:none;margin-top:2px}
 
+/* Mise en page avec bande latérale */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:32px;align-items:start}
+.maincol{min-width:0}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;gap:18px}
+.panel{border:1px solid var(--rule);background:var(--paper);padding:14px 16px 16px}
+.ptitle{margin:0 0 10px;font-size:16px;font-weight:700;color:var(--ink)}
+.mc-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.mc-head b{font-size:15px;font-weight:700;color:var(--blue)}
+.mc-head button{appearance:none;border:1px solid var(--rule);background:var(--paper);color:var(--blue);width:30px;height:30px;font-size:17px;line-height:1;cursor:pointer}
+.mc-head button:disabled{color:var(--muted);cursor:default}
+.mc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.mc-dow{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding:2px 0 4px}
+.mc-day{appearance:none;border:0;background:transparent;font:inherit;font-size:13px;color:var(--ink);height:38px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:5px;gap:3px;cursor:pointer;border-radius:2px}
+.mc-day:hover{background:var(--hover)}
+.mc-day.empty{cursor:default;color:var(--muted)}
+.mc-day.empty:hover{background:transparent}
+.mc-day.today{box-shadow:inset 0 0 0 1.5px var(--blue);font-weight:700}
+.mc-day[aria-pressed="true"]{background:var(--blue);color:var(--on-blue)}
+.mc-day .dots{display:flex;gap:2px;height:5px}
+.mc-day .dots i{width:5px;height:5px;border-radius:50%;display:block}
+.mc-day[aria-pressed="true"] .dots i{box-shadow:0 0 0 1px var(--on-blue)}
+.mc-hint{font-size:12px;color:var(--muted);margin:8px 0 0}
+#map{height:300px;border:1px solid var(--rule);background:var(--alt)}
+.maphint{font-size:12px;color:var(--muted);margin:8px 0 0}
+.leaflet-container{font-family:var(--body)}
+.leaflet-popup-content{margin:10px 12px;font-size:13px;line-height:1.4}
+.leaflet-popup-content a{font-weight:700;color:#000091}
+.pop-item+.pop-item{margin-top:8px;padding-top:8px;border-top:1px solid #ddd}
+.pop-item small{display:block;color:#666}
+.daychip{display:inline-flex;align-items:center;gap:6px;background:var(--blue);color:var(--on-blue);padding:3px 4px 3px 12px;border-radius:999px;font-size:13px;margin-left:8px}
+.daychip button{appearance:none;border:0;background:transparent;color:inherit;font-size:16px;line-height:1;cursor:pointer;padding:0 6px}
+.lieu{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--slate);margin:-6px 0 10px}
+.lieu svg{flex:none;margin-top:2px}
+.ev.flash{box-shadow:0 0 0 3px var(--blue)}
+@media (max-width:1000px){.layout{grid-template-columns:1fr;gap:20px}.side{position:static;order:-1;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}#map{height:240px}}
+
 /* Pied de page */
 .site-foot{border-top:2px solid var(--blue);background:var(--paper)}
 .site-foot .inner{display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding-top:26px;padding-bottom:32px}
@@ -207,7 +245,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
       <p>Dans le cadre du <strong>Plan Avenir</strong>, ils peuvent nourrir les <strong>quatre demi-journées Avenir</strong> et s'inscrire dans le <strong>plan pluriannuel d'éducation à l'orientation (PPO)</strong>, en s'appuyant sur la plateforme <strong>Avenir(s)</strong> de l'Onisep pour les préparer et en garder la trace.</p>
     </section>
     <p class="hint">Choisissez une période, une thématique ou un public, puis exportez la sélection en PDF ou vers votre agenda.</p>
-    <p class="propose" id="propose" hidden><a id="proposeLink" class="btn-propose" target="_blank" rel="noopener">Proposer un évènement</a>, publié après validation.</p>
+    <p class="propose" id="propose" hidden>Pour proposer un évènement, écrivez à <a id="proposeLink" class="btn-propose"></a> (publication après validation).</p>
   </div>
 </section>
 <div class="wrap">
@@ -236,8 +274,25 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #0A76
     <div class="meta"><span id="count" aria-live="polite"></span><button class="linkbtn" id="reset">Réinitialiser les filtres</button></div>
   </section>
 
-  <p class="srcinfo" id="srcinfo" aria-live="polite"></p>
-  <main id="list"></main>
+  <div class="layout">
+    <div class="maincol">
+      <p class="srcinfo" id="srcinfo" aria-live="polite"></p>
+      <main id="list"></main>
+    </div>
+    <aside class="side" aria-label="Calendrier et carte">
+      <section class="panel" aria-labelledby="mct-title">
+        <h2 class="ptitle" id="mct-title">Calendrier</h2>
+        <div class="mc-head"><button id="mcp" aria-label="Mois précédent">‹</button><b id="mct" aria-live="polite"></b><button id="mcn" aria-label="Mois suivant">›</button></div>
+        <div class="mc-grid" id="mcg"></div>
+        <p class="mc-hint">Touchez un jour pour afficher ses évènements.</p>
+      </section>
+      <section class="panel" aria-labelledby="map-title">
+        <h2 class="ptitle" id="map-title">Carte des évènements</h2>
+        <div id="map" role="region" aria-label="Carte des lieux des évènements affichés"></div>
+        <p class="maphint" id="maphint"></p>
+      </section>
+    </aside>
+  </div>
 
 </div>
 <footer class="site-foot">
@@ -263,9 +318,8 @@ const CONFIG={
   urlEnLigne:"https://region-academique-idf.github.io/calendrier-orientation/",
   /* Dates des Rendez-vous de l'orientation de l'Onisep affichées en bas des PDF */
   rdvOnisep:"18 nov. · 16 déc. · 20 janv. · 17 févr. · 17 mars · 16 juin",
-  /* Lien du formulaire Grist pour proposer un évènement.
-     Tant que l'adresse est vide, le bouton reste masqué. */
-  formulaireUrl:"https://grist.numerique.gouv.fr/o/draioidf/forms/tiwD5FpRovHpd6PX5NvUux/7",
+  /* Adresse de contact pour proposer un évènement (vide = ligne masquée) */
+  contactEmail:"ce.draio@region-academique-idf.fr",
   /* Liens vers les outils des académies : collez l'adresse entre les guillemets.
      Tant qu'une adresse est vide, le lien s'affiche « (à venir) ». */
   liensAcademies:{
@@ -280,7 +334,7 @@ const CONFIG={
   table:"Evenements",
   jsonUrl:"",
   statutPublie:"Publié",
-  columns:{titre:"Titre",theme:"Thematique",debut:"Debut",fin:"Fin",periode:"Periode",description:"Description",publics:"Publics",echelle:"Echelle",confirme:"Confirme",recurrent:"Recurrent",lien:"Lien",publication:"Publication",lieu:"Lieu",lat:"Latitude",lon:"Longitude",precision:"Precision"}
+  columns:{titre:"Titre",theme:"Thematique",debut:"Debut",fin:"Fin",periode:"Periode",description:"Description",publics:"Publics",echelle:"Echelle",confirme:"Confirme",recurrent:"Recurrent",lien:"Lien",publication:"Publication",lieu:"Adresse",lat:"Latitude",lon:"Longitude",precision:"Precision"}
 };
 const THEMES={
   aff:{n:"Procédures",alias:["Affectation et admission"],c:"--t-aff"},
@@ -290,7 +344,7 @@ const THEMES={
   ent:{n:"Insertion pro",alias:["Relation école-entreprise et insertion pro"],c:"--t-ent"},
   imm:{n:"Immersion et découverte formations",alias:["Immersion et découverte des formations"],c:"--t-imm"}
 };
-const PUBLICS={col:"Collège",lyc:"Lycée",sup:"Supérieur",eq:"Équipes"};
+const PUBLICS={col:"Collège",lyc:"Lycée",sup:"Supérieur",eq:"Personnels de l'Éducation nationale"};
 const ECH={nat:"National",reg:"Régional",aca:"Académique",eta:"Établissement"};
 const DEMO_EVENTS=[
  {t:"aff",a:"2026-09-01",b:"2026-09-30",w:"Septembre",ti:"Commissions pour les élèves sans solution",d:"Affectation des élèves restés sans affectation à la rentrée.",p:["lyc","eq"],e:"aca"},
@@ -447,9 +501,10 @@ function render(){
   if(LOAD.state==="error"){info.textContent="";$("count").textContent="";list.innerHTML=`<div class="empty"><b>Le calendrier n'a pas pu être chargé depuis Grist.</b><br>Vérifiez que le document est partagé en lecture publique et que la configuration en tête du fichier est correcte. Détail technique : ${esc(LOAD.msg)}<br><button class="linkbtn" id="retry">Réessayer</button></div>`;$("retry").onclick=()=>{LOAD={state:"loading"};render();loadData()};return}
   info.textContent=LOAD.state==="demo"?"Données de démonstration. Renseignez la configuration Grist en tête du fichier pour afficher le calendrier réel.":`Calendrier à jour, chargé depuis Grist à ${LOAD.at.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}.`+(LOAD.skipped?` ${LOAD.skipped} ligne${LOAD.skipped>1?"s":""} ignorée${LOAD.skipped>1?"s":""} (titre ou thématique manquant, ou date hors de l'année 2026-2027).`:"");
   const evs=visible();
+  sideUpdate(evs);
   if(st.day){const dl=st.day.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
-    $("count").innerHTML=`${evs.length} évènement${evs.length>1?"s":""}<span class="daychip">${esc(dl)}<button id="dayx" aria-label="Revenir à la période">×</button></span>`;$("dayx").onclick=()=>{st.day=null;render()};
-    if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ce jour-là avec les filtres choisis. <button class="linkbtn" id="dx2">Revenir à la période</button></div>`;$("dx2").onclick=()=>{st.day=null;render()};return}
+    $("count").innerHTML=`${evs.length} évènement${evs.length>1?"s":""}<span class="daychip">${esc(dl)}<button id="dayx" aria-label="Revenir à la période">×</button></span>`;$("dayx").onclick=()=>{st.day=null;syncCal();render()};
+    if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ce jour-là avec les filtres choisis. <button class="linkbtn" id="dx2">Revenir à la période</button></div>`;$("dx2").onclick=()=>{st.day=null;syncCal();render()};return}
     list.innerHTML=`<section class="month"><h2>${st.day.getDate()} ${M[mIdx(st.day)].toLowerCase()}<small>${(w=>w[0].toUpperCase()+w.slice(1))(st.day.toLocaleDateString("fr-FR",{weekday:"long"}))} · ${st.day.getFullYear()}</small></h2><div class="events">${evs.map(e=>card(e,null)).join("")}</div></section>`;return}
   $("count").textContent=`${evs.length} évènement${evs.length>1?"s":""} sur la période`;
   if(!evs.length){list.innerHTML=`<div class="empty">Aucun évènement ne correspond à ces filtres sur cette période. Changez de période, ajoutez une thématique ou <button class="linkbtn" id="r2">réinitialisez les filtres</button>.</div>`;$("r2").onclick=resetAll;return}
@@ -459,9 +514,9 @@ function render(){
 function resetAll(){st.themes=new Set(Object.keys(THEMES));st.publics.clear();st.q="";$("q").value="";save();render()}
 
 document.querySelectorAll("#vseg button").forEach(b=>b.onclick=()=>{st.view=b.dataset.v;st.day=null;save();render()});
-document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{const cur=P(),ref=NOW>=cur.s&&NOW<=cur.e?NOW:cur.s;st.gran=b.dataset.g;st.idx=periodOf(st.gran,ref);st.sel=null;st.day=null;save();render()});
-$("prev").onclick=()=>{st.idx=Math.max(0,st.idx-1);st.sel=null;st.day=null;render()};
-$("next").onclick=()=>{st.idx=Math.min(PER[st.gran].length-1,st.idx+1);st.sel=null;st.day=null;render()};
+document.querySelectorAll("#gseg button").forEach(b=>b.onclick=()=>{const cur=P(),ref=NOW>=cur.s&&NOW<=cur.e?NOW:cur.s;st.gran=b.dataset.g;st.idx=periodOf(st.gran,ref);st.sel=null;st.day=null;syncCal();save();render()});
+$("prev").onclick=()=>{st.idx=Math.max(0,st.idx-1);st.sel=null;st.day=null;syncCal();render()};
+$("next").onclick=()=>{st.idx=Math.min(PER[st.gran].length-1,st.idx+1);st.sel=null;st.day=null;syncCal();render()};
 $("reset").onclick=resetAll;
 $("q").addEventListener("input",e=>{st.q=e.target.value.trim();render()});
 
@@ -484,14 +539,14 @@ function fromGrist(f){
   const ti=String(g("titre")??"").trim(),t=byLabel(THEMES,one(g("theme")));
   if(!ti||!t)return null;
   const a=toISO(g("debut")),b=toISO(g("fin"))||a;
-  let w=String(g("periode")??"").trim();
+  let w=String(g("periode")??f[Object.keys(f).find(k=>/^periode/i.test(k))]??"").trim();
   if(!w)w=a?(a===b?shortD(a):`${shortD(a)} → ${shortD(b)}`):"Date à fixer";
   const url=String(g("lien")??"").trim();
   return {t,ti,a,b,w,d:String(g("description")??"").trim(),
-    p:toList(g("publics")).map(x=>byLabel(PUBLICS,x)).filter(Boolean),
+    p:toList(g("publics")).map(x=>byLabel(PUBLICS,x)||(normK(x)==="equipes"?"eq":null)).filter(Boolean),
     e:byLabel(ECH,one(g("echelle"))),ok:toBool(g("confirme")),rec:toBool(g("recurrent")),
     url:/^https?:\/\//i.test(url)?url:"",
-    lieu:String(g("lieu")??"").trim(),pr:String(g("precision")??"").trim(),lat:toNum(g("lat")),lon:toNum(g("lon"))};
+    lieu:String(g("lieu")??f["Lieu"]??"").trim(),pr:String(g("precision")??"").trim(),lat:toNum(g("lat")),lon:toNum(g("lon"))};
 }
 async function loadData(){
   let url=null;
@@ -504,7 +559,7 @@ async function loadData(){
     const j=await r.json(),recs=Array.isArray(j)?j:(j.records||[]);
     let bad=0;const evs=[];const pub=normK(CONFIG.statutPublie);
     recs.forEach(rec=>{const f=rec.fields||rec;{const pv=f[CONFIG.columns.publication];if(normK(Array.isArray(pv)?toList(pv)[0]:pv)!==pub)return;}const ev=fromGrist(f);ev?evs.push(ev):bad++});
-    const res=prepare(evs);EVENTS=res.list;LOAD={state:"ok",at:new Date(),skipped:bad+res.out};
+    const res=prepare(evs);EVENTS=res.list;LOAD={state:"ok",at:new Date(),skipped:bad+res.out};setTimeout(geocodeAll,0);
   }catch(e){LOAD={state:"error",msg:e&&e.message?e.message:String(e)}}
   render();
 }
@@ -513,10 +568,85 @@ async function loadData(){
   if(/^https?:\/\//i.test(u)){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";a.innerHTML=`${esc(n)} ↗`;a.setAttribute("aria-label",`Accéder aux actions spécifiques de l'académie de ${n} (nouvel onglet)`);box.appendChild(a)}
   else{const sp=document.createElement("span");sp.textContent=`${n} (à venir)`;box.appendChild(sp)}})})();
 
-st.day=null;
+/* ===== Bande latérale : mini calendrier et carte ===== */
+st.day=null;st.cal=clamp(NOW,0,11);
+function syncCal(){const p=P();st.cal=(NOW>=p.s&&NOW<=p.e)?NOW:p.s}
+const themeColor=k=>getComputedStyle(document.documentElement).getPropertyValue(THEMES[k].c).trim()||"#000091";
+function renderMini(){
+  const i=st.cal,y=YEARS[i],mo=(8+i)%12,first=new Date(y,mo,1,12),nd=new Date(y,mo+1,0).getDate();
+  $("mct").textContent=`${M[i]} ${y}`;$("mcp").disabled=i===0;$("mcn").disabled=i===11;
+  const evs=EVENTS.filter(e=>e.A&&baseMatch(e));
+  let h=["L","M","M","J","V","S","D"].map(d=>`<div class="mc-dow" aria-hidden="true">${d}</div>`).join("");
+  const off=(first.getDay()+6)%7;for(let k=0;k<off;k++)h+=`<div></div>`;
+  for(let d=1;d<=nd;d++){
+    const day=new Date(y,mo,d,12),t=day.getTime();
+    const on=evs.filter(e=>e.A.getTime()<=t&&e.B.getTime()>=t);
+    const dotted=on.filter(e=>!e.rec&&((e.B-e.A)/DAY<=14||e.A.getTime()===t));
+    const cols=[...new Set(dotted.map(e=>e.t))].slice(0,3);
+    const isT=day.toDateString()===today.toDateString(),sel=st.day&&st.day.getTime()===t;
+    h+=`<button class="mc-day${on.length?"":" empty"}${isT?" today":""}" data-d="${d}" aria-pressed="${!!sel}" aria-label="${day.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}, ${on.length} évènement${on.length>1?"s":""}"${on.length?"":" disabled"}>${d}<span class="dots">${cols.map(k=>`<i style="background:var(${THEMES[k].c})"></i>`).join("")}</span></button>`;
+  }
+  $("mcg").innerHTML=h;
+  $("mcg").querySelectorAll(".mc-day[data-d]:not(.empty)").forEach(b=>b.onclick=()=>{const day=new Date(y,mo,+b.dataset.d,12);st.day=(st.day&&st.day.getTime()===day.getTime())?null:day;st.sel=null;render();if(st.day&&matchMedia("(max-width:1000px)").matches)$("list").scrollIntoView({block:"start"})});
+}
+$("mcp").onclick=()=>{st.cal=Math.max(0,st.cal-1);renderMini()};
+$("mcn").onclick=()=>{st.cal=Math.min(11,st.cal+1);renderMini()};
+
+let MAP=null,LAYER=null,LASTEVS=[];
+const GEO={};try{Object.assign(GEO,JSON.parse(localStorage.getItem("cal-geo")||"{}"))}catch(e){}
+const geoKey=s=>normK(s);
+const coords=e=>(e.lat!=null&&e.lon!=null)?[e.lat,e.lon]:(e.lieu&&GEO[geoKey(e.lieu)])||null;
+function initMap(){
+  if(MAP||!window.L)return;
+  MAP=L.map("map",{scrollWheelZoom:false,attributionControl:true}).setView([48.80,2.45],9);
+  L.tileLayer("https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}",{maxZoom:18,attribution:'© <a href="https://www.ign.fr/" target="_blank" rel="noopener">IGN</a>'}).addTo(MAP);
+  LAYER=L.layerGroup().addTo(MAP);
+  MAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+  $("map").addEventListener("click",ev=>{const a=ev.target.closest("a[data-ev]");if(!a)return;ev.preventDefault();goToEvent(+a.dataset.ev)});
+}
+function goToEvent(id){
+  let el=document.getElementById("ev-"+id);
+  if(!el){const e=EVENTS[id];if(!e)return;st.view="fil";st.day=null;if(e.m!=null&&!inPeriod(e,P())){st.idx=periodOf(st.gran,e.m);syncCal()}render();el=document.getElementById("ev-"+id)}
+  if(!el)return;el.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+  el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1600);
+}
+function renderMap(evs){
+  LASTEVS=evs;initMap();
+  const hint=$("maphint");
+  if(!MAP){hint.textContent="La carte n'a pas pu être chargée.";return}
+  LAYER.clearLayers();
+  const groups={};let n=0;
+  evs.forEach(e=>{const c=coords(e);if(!c)return;n++;const k=c[0].toFixed(4)+","+c[1].toFixed(4);(groups[k]=groups[k]||{c,list:[]}).list.push(e)});
+  const pts=[];
+  Object.values(groups).forEach(g=>{
+    const e0=g.list[0];pts.push(g.c);
+    const m=L.circleMarker(g.c,{radius:g.list.length>1?9:7,color:"#fff",weight:2,fillColor:themeColor(e0.t),fillOpacity:1});
+    m.bindPopup(g.list.map(e=>`<div class="pop-item"><a href="#ev-${e.id}" data-ev="${e.id}">${esc(e.ti)}</a><small>${esc(e.w)}${e.lieu?" · "+esc(e.lieu):""}</small></div>`).join(""),{maxWidth:260});
+    m.bindTooltip(g.list.length>1?`${g.list.length} évènements`:e0.ti,{direction:"top",offset:[0,-6]});
+    m.addTo(LAYER);
+  });
+  if(pts.length)MAP.fitBounds(pts,{padding:[24,24],maxZoom:13});else MAP.setView([48.80,2.45],9);
+  setTimeout(()=>MAP&&MAP.invalidateSize(),0);
+  const withLieu=evs.filter(e=>e.lieu||e.lat!=null).length;
+  hint.textContent=n?`${n} évènement${n>1?"s":""} localisé${n>1?"s":""} sur ${evs.length} affiché${evs.length>1?"s":""}.`+(withLieu>n?" Localisation en cours…":""):(evs.length?"Aucun lieu renseigné pour les évènements affichés.":"");
+}
+function sideUpdate(evs){renderMini();renderMap(evs)}
+let geoBusy=false;
+async function geocodeAll(){
+  if(geoBusy)return;geoBusy=true;
+  const todo=[...new Set(EVENTS.filter(e=>e.lieu&&(e.lat==null||e.lon==null)&&!GEO[geoKey(e.lieu)]).map(e=>e.lieu))];
+  for(const q of todo){
+    try{
+      let r=await fetch(`https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(q)}&index=address,poi&limit=1`);
+      if(!r.ok)r=await fetch(`https://data.geopf.fr/geocodage/search?q=${encodeURIComponent(q)}&limit=1`);
+      if(r.ok){const j=await r.json(),f=j.features&&j.features[0];if(f&&f.geometry&&f.geometry.coordinates){const[lon,lat]=f.geometry.coordinates;GEO[geoKey(q)]=[lat,lon];try{localStorage.setItem("cal-geo",JSON.stringify(GEO))}catch(e){}renderMap(LASTEVS)}}
+    }catch(e){}
+  }
+  geoBusy=false;renderMap(LASTEVS);
+}
 
 try{$("footlogo").src=$("logo").src}catch(e){}
-{const u=String(CONFIG.formulaireUrl||"").trim();if(/^https?:\/\//i.test(u)){$("proposeLink").href=u;$("proposeLink").setAttribute("aria-label","Proposer un évènement, publié après validation (nouvel onglet)");$("proposeLink").title="Votre proposition sera publiée après validation";$("propose").hidden=false}}
+{const m=String(CONFIG.contactEmail||"").trim();if(/^[^@\s]+@[^@\s]+$/.test(m)){const a=$("proposeLink");a.href="mailto:"+m+"?subject="+encodeURIComponent("Proposition d'évènement pour l'agenda");a.textContent=m;$("propose").hidden=false}}
 render();
 loadData();
 
